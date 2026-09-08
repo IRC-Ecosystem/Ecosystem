@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - LogistiKita</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <link rel="stylesheet" href="assets/css/auth.css">
+</head>
+
+<body class="auth-split-page">
+
+    <!-- Left Banner -->
+    <div class="auth-banner">
+        <div class="banner-overlay"></div>
+        <div class="banner-content">
+            <h1>Bergabung Bersama<br>LogistiKita</h1>
+            <p>Daftar sekarang dan nikmati kemudahan pengiriman logistik terbaik dan modern.</p>
+        </div>
+    </div>
+
+    <!-- Right Form Content -->
+    <div class="auth-content">
+        <div class="auth-card-split">
+            <a href="home" class="back-to-home">
+                <i class="fas fa-arrow-left"></i>
+                <span>Kembali</span>
+            </a>
+
+            <div class="auth-split-header">
+                <a href="home" class="logo">
+                    <i class="fas fa-cube"></i>
+                    <span>Logisti<b>Kita</b></span>
+                </a>
+                <h2>Buat Akun Baru</h2>
+                <p>Silakan isi data diri Anda di bawah ini</p>
+            </div>
+
+            <form id="register-form">
+                <div class="input-field">
+                    <label>Nama Lengkap</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="register-name" placeholder="Nama Lengkap Anda" required>
+                    </div>
+                </div>
+                <div class="input-field">
+                    <label>Alamat Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="register-email" placeholder="nama@email.com" required>
+                    </div>
+                </div>
+                <div class="input-field" style="margin-bottom: 32px;">
+                    <label>Kata Sandi Baru</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="register-password" placeholder="Minimal 8 karakter" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Daftar Sekarang</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Sudah punya akun? <a href="login">Masuk di sini</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+
+</html>

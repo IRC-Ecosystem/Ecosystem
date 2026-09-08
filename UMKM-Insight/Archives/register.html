@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Insight — Daftar Akun</title>
+    <meta name="description" content="Daftar akun UMKM Insight gratis untuk mulai mengakses analitik bisnis Anda.">
+    <link rel="stylesheet" href="shared.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body{min-height:100vh;display:flex;}
+        .auth-left{flex:1;background:linear-gradient(135deg,#0f172a 0%,#134e4a 50%,#0d9488 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px;position:relative;overflow:hidden;}
+        .auth-left::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+        .auth-left-content{position:relative;z-index:2;max-width:400px;text-align:center;color:white;}
+        .auth-left-content h2{font-size:2rem;font-weight:800;margin-bottom:16px;letter-spacing:-0.02em;}
+        .auth-left-content p{font-size:.9375rem;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:32px;}
+        .benefit-list{text-align:left;display:flex;flex-direction:column;gap:16px;}
+        .benefit-item{display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);padding:16px;border-radius:var(--radius-xl);}
+        .benefit-item i{font-size:1.5rem;color:var(--brand-300);flex-shrink:0;margin-top:2px;}
+        .benefit-item div h4{font-size:.875rem;font-weight:600;margin-bottom:4px;}
+        .benefit-item div p{font-size:.75rem;color:rgba(255,255,255,0.6);margin:0;}
+        .orb{position:absolute;border-radius:50%;filter:blur(80px);z-index:1;}
+        .orb-1{width:300px;height:300px;background:rgba(20,184,166,0.15);top:-60px;right:-40px;}
+        .orb-2{width:250px;height:250px;background:rgba(99,102,241,0.1);bottom:-50px;left:-30px;}
+
+        .auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 24px;background:var(--surface);overflow-y:auto;}
+        .auth-card{width:100%;max-width:520px;animation:fadeIn 0.5s ease-out;}
+        .auth-card .logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+        .auth-card .logo i{font-size:2rem;color:var(--brand-600);}
+        .auth-card .logo span{font-size:1.5rem;font-weight:800;color:var(--text-primary);letter-spacing:-0.02em;}
+        .auth-card h1{font-size:1.5rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;}
+        .auth-card .subtitle{font-size:.875rem;color:var(--text-secondary);margin-bottom:24px;}
+
+        .step-panels .step-panel{display:none;}
+        .step-panels .step-panel.active{display:block;animation:fadeIn 0.3s ease-out;}
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        .form-grid .full{grid-column:1/-1;}
+        .footer-text{text-align:center;font-size:.8125rem;color:var(--text-secondary);margin-top:20px;}
+        .footer-text a{color:var(--brand-600);font-weight:600;text-decoration:none;}
+        .footer-text a:hover{text-decoration:underline;}
+        .step-nav{display:flex;gap:12px;margin-top:24px;}
+        .step-nav .btn{flex:1;}
+        @media(max-width:768px){
+            .auth-left{display:none;}
+            body{flex-direction:column;}
+            .form-grid{grid-template-columns:1fr;}
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-left">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="auth-left-content">
+            <h2>Mulai Perjalanan Bisnis Anda</h2>
+            <p>Bergabunglah dengan ribuan UMKM yang sudah menggunakan data untuk bertumbuh.</p>
+            <div class="benefit-list">
+                <div class="benefit-item"><i class="ph-fill ph-shield-check"></i><div><h4>Gratis Selamanya</h4><p>Akses dashboard dasar tanpa biaya apapun.</p></div></div>
+                <div class="benefit-item"><i class="ph-fill ph-lock-simple"></i><div><h4>Data Aman</h4><p>Read-only — data transaksi Anda tidak akan diubah.</p></div></div>
+                <div class="benefit-item"><i class="ph-fill ph-lightning"></i><div><h4>Setup Cepat</h4><p>3 langkah mudah, siap dalam hitungan menit.</p></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-right">
+        <div class="auth-card">
+            <div class="logo"><i class="ph-fill ph-chart-polar"></i><span>UMKM Insight</span></div>
+            <h1>Buat Akun Baru</h1>
+            <p class="subtitle">Lengkapi data berikut untuk mendaftarkan UMKM Anda.</p>
+
+            <!-- Step Indicator -->
+            <div class="steps" id="step-indicator">
+                <div class="step active" id="step-ind-1"><span class="step-num">1</span><span>Akun</span></div>
+                <div class="step-line" id="step-line-1"></div>
+                <div class="step" id="step-ind-2"><span class="step-num">2</span><span>Profil UMKM</span></div>
+                <div class="step-line" id="step-line-2"></div>
+                <div class="step" id="step-ind-3"><span class="step-num">3</span><span>Integrasi</span></div>
+            </div>
+
+            <form id="register-form" onsubmit="return handleRegister(event)">
+                <div class="step-panels">
+                    <!-- STEP 1: Account -->
+                    <div class="step-panel active" id="panel-1">
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label class="form-label">Nama Lengkap *</label>
+                                <div style="position:relative;"><i class="ph ph-user form-input-icon"></i><input type="text" id="reg-nama" class="form-input has-icon" placeholder="Budi Santoso"></div>
+                                <span class="form-error" id="err-nama">Nama lengkap wajib diisi</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Bisnis *</label>
+                                <div style="position:relative;"><i class="ph ph-envelope form-input-icon"></i><input type="email" id="reg-email" class="form-input has-icon" placeholder="nama@bisnis.com"></div>
+                                <span class="form-error" id="err-email">Email tidak valid</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Username *</label>
+                                <div style="position:relative;"><i class="ph ph-at form-input-icon"></i><input type="text" id="reg-username" class="form-input has-icon" placeholder="username_anda"></div>
+                                <span class="form-error" id="err-username">Username wajib diisi</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password *</label>
+                                <div style="position:relative;"><i class="ph ph-lock form-input-icon"></i><input type="password" id="reg-password" class="form-input has-icon" placeholder="Min. 8 karakter"></div>
+                                <span class="form-error" id="err-password">Password minimal 8 karakter</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Konfirmasi Password *</label>
+                                <div style="position:relative;"><i class="ph ph-lock-key form-input-icon"></i><input type="password" id="reg-confirm" class="form-input has-icon" placeholder="Ulangi password"></div>
+                                <span class="form-error" id="err-confirm">Password tidak cocok</span>
+                            </div>
+                        </div>
+                        <div class="step-nav"><button type="button" class="btn btn-primary" onclick="goStep(2)">Lanjut <i class="ph ph-arrow-right"></i></button></div>
+                    </div>
+
+                    <!-- STEP 2: UMKM Profile -->
+                    <div class="step-panel" id="panel-2">
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label class="form-label">Nama Bisnis / UMKM *</label>
+                                <div style="position:relative;"><i class="ph ph-storefront form-input-icon"></i><input type="text" id="reg-bisnis" class="form-input has-icon" placeholder="Toko Berkah Utama"></div>
+                                <span class="form-error" id="err-bisnis">Nama bisnis wajib diisi</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Kategori UMKM *</label>
+                                <select id="reg-kategori" class="form-select">
+                                    <option value="">Pilih Kategori</option>
+                                    <option>Makanan & Minuman</option>
+                                    <option>Fashion & Kerajinan</option>
+                                    <option>Pertanian & Peternakan</option>
+                                    <option>Jasa & Layanan</option>
+                                    <option>Teknologi & Digital</option>
+                                    <option>Lainnya</option>
+                                </select>
+                                <span class="form-error" id="err-kategori">Pilih kategori</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">No. Telepon *</label>
+                                <div style="position:relative;"><i class="ph ph-phone form-input-icon"></i><input type="tel" id="reg-telepon" class="form-input has-icon" placeholder="081234567890"></div>
+                                <span class="form-error" id="err-telepon">Nomor telepon wajib diisi</span>
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">Alamat Bisnis *</label>
+                                <div style="position:relative;"><i class="ph ph-map-pin form-input-icon"></i><input type="text" id="reg-alamat" class="form-input has-icon" placeholder="Jl. Merdeka No. 10, Surabaya"></div>
+                                <span class="form-error" id="err-alamat">Alamat wajib diisi</span>
+                            </div>
+                            <div class="form-group full">
+                                <label class="form-label">Deskripsi Bisnis</label>
+                                <textarea id="reg-deskripsi" class="form-input" rows="3" placeholder="Ceritakan singkat tentang bisnis Anda..." style="resize:vertical;padding:10px 14px;"></textarea>
+                            </div>
+                        </div>
+                        <div class="step-nav">
+                            <button type="button" class="btn btn-outline" onclick="goStep(1)"><i class="ph ph-arrow-left"></i> Kembali</button>
+                            <button type="button" class="btn btn-primary" onclick="goStep(3)">Lanjut <i class="ph ph-arrow-right"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Integration -->
+                    <div class="step-panel" id="panel-3">
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label class="form-label">SmartBank Account ID *</label>
+                                <div style="position:relative;"><i class="ph ph-bank form-input-icon"></i><input type="text" id="reg-smartbank" class="form-input has-icon" placeholder="SB-UMKM-XXX"></div>
+                                <span class="form-error" id="err-smartbank">SmartBank ID wajib diisi untuk integrasi</span>
+                                <span class="form-hint"><i class="ph ph-info" style="vertical-align:middle;"></i> ID ini digunakan untuk mengambil data transaksi Anda secara read-only dari SmartBank.</span>
+                            </div>
+                            <div class="form-group full" style="background:var(--surface-alt);padding:20px;border-radius:var(--radius-xl);border:1px solid var(--border);">
+                                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+                                    <i class="ph-fill ph-info" style="color:var(--brand-600);font-size:1.25rem;"></i>
+                                    <span style="font-weight:600;font-size:.875rem;">Informasi Penting</span>
+                                </div>
+                                <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:.8125rem;color:var(--text-secondary);">
+                                    <li style="display:flex;align-items:flex-start;gap:8px;"><i class="ph-fill ph-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>Akun Anda akan dimulai dengan <strong>Free Tier</strong></li>
+                                    <li style="display:flex;align-items:flex-start;gap:8px;"><i class="ph-fill ph-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>Data transaksi hanya dibaca (read-only), tidak ada perubahan</li>
+                                    <li style="display:flex;align-items:flex-start;gap:8px;"><i class="ph-fill ph-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0;"></i>Upgrade ke Premium kapan saja melalui Admin</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="step-nav">
+                            <button type="button" class="btn btn-outline" onclick="goStep(2)"><i class="ph ph-arrow-left"></i> Kembali</button>
+                            <button type="submit" class="btn btn-primary" id="btn-register"><i class="ph ph-check"></i> Daftar Sekarang</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <p class="footer-text">Sudah punya akun? <a href="login.html">Masuk</a></p>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        initData();
+        // Redirect if logged in
+        const s = getSession();
+        if (s) window.location.href = s.role === 'admin' ? 'admin.html' : 'dashboard.html';
+
+        let currentStep = 1;
+
+        function goStep(step) {
+            // Validate current step before advancing
+            if (step > currentStep && !validateStep(currentStep)) return;
+
+            currentStep = step;
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + step).classList.add('active');
+
+            // Update indicators
+            for (let i = 1; i <= 3; i++) {
+                const ind = document.getElementById('step-ind-' + i);
+                ind.classList.remove('active', 'done');
+                if (i < step) ind.classList.add('done');
+                else if (i === step) ind.classList.add('active');
+            }
+            for (let i = 1; i <= 2; i++) {
+                const line = document.getElementById('step-line-' + i);
+                line.classList.toggle('active', i < step);
+            }
+        }
+
+        function validateStep(step) {
+            document.querySelectorAll('.form-error').forEach(el => el.classList.remove('visible'));
+            let valid = true;
+            const show = (id) => { document.getElementById(id).classList.add('visible'); valid = false; };
+
+            if (step === 1) {
+                if (!document.getElementById('reg-nama').value.trim()) show('err-nama');
+                const email = document.getElementById('reg-email').value.trim();
+                if (!email || !email.includes('@')) show('err-email');
+                const uname = document.getElementById('reg-username').value.trim();
+                if (!uname) show('err-username');
+                else {
+                    const users = getUsers();
+                    if (users.find(u => u.username === uname)) { document.getElementById('err-username').textContent = 'Username sudah digunakan'; show('err-username'); }
+                }
+                const pass = document.getElementById('reg-password').value;
+                if (pass.length < 8) show('err-password');
+                if (pass !== document.getElementById('reg-confirm').value) show('err-confirm');
+            } else if (step === 2) {
+                if (!document.getElementById('reg-bisnis').value.trim()) show('err-bisnis');
+                if (!document.getElementById('reg-kategori').value) show('err-kategori');
+                if (!document.getElementById('reg-telepon').value.trim()) show('err-telepon');
+                if (!document.getElementById('reg-alamat').value.trim()) show('err-alamat');
+            } else if (step === 3) {
+                if (!document.getElementById('reg-smartbank').value.trim()) show('err-smartbank');
+            }
+            return valid;
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            if (!validateStep(3)) return false;
+
+            const users = getUsers();
+            const newUser = {
+                id: 'USR-' + String(users.length + 1).padStart(3, '0'),
+                username: document.getElementById('reg-username').value.trim(),
+                password: document.getElementById('reg-password').value,
+                role: 'client',
+                nama: document.getElementById('reg-nama').value.trim(),
+                email: document.getElementById('reg-email').value.trim(),
+                bisnis: document.getElementById('reg-bisnis').value.trim(),
+                kategori: document.getElementById('reg-kategori').value,
+                alamat: document.getElementById('reg-alamat').value.trim(),
+                telepon: document.getElementById('reg-telepon').value.trim(),
+                deskripsi: document.getElementById('reg-deskripsi').value.trim(),
+                smartbankId: document.getElementById('reg-smartbank').value.trim(),
+                tier: 'free',
+                tierExpiry: null,
+                registeredAt: new Date().toISOString().split('T')[0]
+            };
+            users.push(newUser);
+            saveUsers(users);
+            login(newUser.username, newUser.password);
+            window.location.href = 'dashboard.html';
+            return false;
+        }
+    </script>
+</body>
+</html>

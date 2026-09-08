@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="API Gateway Ekosistem UMKM — Pusat integrasi SmartBank, Marketplace, POS, SupplierHub, LogistiKita, dan UMKM Insight">
+  <title>API Gateway — Ekosistem UMKM</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .ekosistem-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;margin:8px 0}
+    .ekosistem-apps{display:flex;flex-direction:column;gap:10px}
+    .ekosistem-app-pill{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid var(--border-glass);border-radius:10px;font-size:13px;font-weight:500;color:var(--text-secondary);transition:var(--transition)}
+    .ekosistem-app-pill:hover{background:rgba(255,255,255,0.06);border-color:rgba(99,102,241,0.3);color:var(--text-primary)}
+    .pill-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .pill-arrow{margin-left:auto;opacity:0.4;font-size:16px}
+    .ekosistem-center{display:flex;flex-direction:column;align-items:center;gap:8px}
+    .gateway-badge{background:var(--gradient-primary);border-radius:16px;padding:20px 24px;text-align:center;box-shadow:0 0 40px rgba(99,102,241,0.3)}
+    .gateway-badge svg{width:32px;height:32px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .gateway-badge .gw-label{font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);text-transform:uppercase;letter-spacing:1px;margin-top:6px}
+    .gateway-badge .gw-desc{font-size:10px;color:rgba(255,255,255,0.6);margin-top:2px}
+    .ekosistem-arrows{display:flex;flex-direction:column;align-items:center;gap:18px;color:var(--accent-blue-light);font-size:20px;opacity:0.5}
+    .stat-live-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--accent-emerald);background:rgba(16,185,129,0.1);padding:2px 8px;border-radius:20px;margin-top:4px;font-weight:600}
+    .stat-live-tag::before{content:'';width:6px;height:6px;background:var(--accent-emerald);border-radius:50%;animation:livePulse 2s ease-in-out infinite}
+    @keyframes livePulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .panduan-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+    .panduan-step-card{background:rgba(255,255,255,0.02);border:1px solid var(--border-glass);border-radius:12px;padding:16px;transition:var(--transition)}
+    .panduan-step-card:hover{background:rgba(255,255,255,0.05);transform:translateY(-2px)}
+    .panduan-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;margin-bottom:10px}
+    @media(max-width:768px){.ekosistem-grid{grid-template-columns:1fr}.ekosistem-arrows{flex-direction:row;font-size:16px}}
+  </style>
+</head>
+
+<body>
+
+  <!-- Background Animation -->
+  <div class="bg-animation">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Mobile Toggle -->
+  <button class="mobile-toggle" id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <div class="app-container">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="logo-text">
+          <h1>API Gateway</h1>
+          <span class="version">Ekosistem UMKM</span>
+        </div>
+      </div>
+
+      <nav>
+        <div class="nav-section">
+          <div class="nav-section-title">Menu Utama</div>
+
+          <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard" data-roles="admin,operator,end_user"
+               data-tooltip="Ringkasan status gateway, statistik, dan koneksi ekosistem real-time" data-tooltip-pos="right">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </span>
+            Beranda
+          </div>
+
+          <div class="nav-item" onclick="showPage('token')" id="nav-token" data-roles="admin,operator,end_user"
+               data-tooltip="Buat, lihat, dan kelola API token untuk autentikasi ke layanan" data-tooltip-pos="right">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            </span>
+            Akses &amp; Token
+          </div>
+
+          <div class="nav-item" onclick="showPage('transaksi')" id="nav-transaksi" data-roles="admin,end_user"
+               data-tooltip="Kirim data transaksi manual ke salah satu layanan dalam ekosistem" data-tooltip-pos="right">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </span>
+            Kirim Transaksi
+          </div>
+
+          <div class="nav-item" onclick="showPage('universal')" id="nav-universal" data-roles="admin,operator,end_user"
+               data-tooltip="Routing universal: teruskan data ke semua aplikasi ekosistem sekaligus" data-tooltip-pos="right">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </span>
+            Kirim ke Ekosistem
+          </div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Manajemen</div>
+
+          <div class="nav-item" onclick="showPage('alur')" id="nav-alur" data-roles="admin,operator,end_user"
+               data-tooltip="Diagram visual cara kerja dan alur integrasi antar aplikasi ekosistem" data-tooltip-pos="right">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </span>
+            Cara Kerja
+          </div>
+
+          <div class="nav-item" onclick="showPage('docs')" id="nav-docs" data-roles="admin,operator,end_user"
+               data-tooltip="Referensi lengkap endpoint, parameter, dan contoh penggunaan API" data-tooltip-pos="right">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </span>
+            Dokumentasi API
+          </div>
+
+          <div class="nav-item" onclick="showPage('fee')" id="nav-fee" data-roles="admin,operator"
+               data-tooltip="Hitung estimasi biaya transaksi dan komisi gateway secara otomatis" data-tooltip-pos="right">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </span>
+            Kalkulator Biaya
+            <span class="nav-badge-chip admin">Admin</span>
+          </div>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user" id="sidebarUser">
+          <div class="user-avatar">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="user-info">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-role">Konsumen</div>
+          </div>
+        </div>
+
+        <button class="btn btn-outline btn-logout" onclick="logout()" id="btnLogout"
+                data-tooltip="Keluar dari sesi API Gateway saat ini">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+
+        <div class="status-indicator">
+          <div class="status-dot" id="serverDot"></div>
+          <span id="serverStatus">Mengecek server...</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main-content">
+
+      <!-- ========== BERANDA / DASHBOARD ========== -->
+      <section class="page-section active" id="page-dashboard">
+        <div class="page-header">
+          <h2>
+            <span class="ph-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </span>
+            Beranda — API Gateway Ekosistem UMKM
+          </h2>
+          <p>Pusat integrasi dan routing antar aplikasi ekosistem ekonomi digital UMKM</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div class="stat-value" id="statTxToday">—</div>
+            <div class="stat-label">Transaksi Hari Ini</div>
+            <div class="stat-live-tag">LIVE</div>
+          </div>
+
+          <div class="stat-card green">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="stat-value">JWT HS256</div>
+            <div class="stat-label">Keamanan Transaksi</div>
+          </div>
+
+          <div class="stat-card amber">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-value">0.5%</div>
+            <div class="stat-label">Biaya Layanan Gateway</div>
+          </div>
+
+          <div class="stat-card rose">
+            <div class="stat-icon-wrap">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div class="stat-value" id="statApps">6</div>
+            <div class="stat-label">Aplikasi Terhubung</div>
+          </div>
+        </div>
+
+        <!-- Ekosistem Map -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </span>
+              Peta Ekosistem Ekonomi UMKM
+            </div>
+          </div>
+          <div class="ekosistem-grid">
+            <div class="ekosistem-apps">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Aplikasi Pengirim</div>
+              <div class="ekosistem-app-pill"><span class="pill-dot" style="background:#6366f1;"></span><span>SmartBank <small style="opacity:0.5;">Kel. 1</small></span><span class="pill-arrow">&#8594;</span></div>
+              <div class="ekosistem-app-pill"><span class="pill-dot" style="background:#10b981;"></span><span>PasarKita <small style="opacity:0.5;">Kel. 2</small></span><span class="pill-arrow">&#8594;</span></div>
+              <div class="ekosistem-app-pill"><span class="pill-dot" style="background:#f59e0b;"></span><span>WarungPOS <small style="opacity:0.5;">Kel. 3</small></span><span class="pill-arrow">&#8594;</span></div>
+              <div class="ekosistem-app-pill"><span class="pill-dot" style="background:#a855f7;"></span><span>SupplierHub <small style="opacity:0.5;">Kel. 4</small></span><span class="pill-arrow">&#8594;</span></div>
+              <div class="ekosistem-app-pill"><span class="pill-dot" style="background:#22d3ee;"></span><span>LogistiKita <small style="opacity:0.5;">Kel. 5</small></span><span class="pill-arrow">&#8594;</span></div>
+              <div class="ekosistem-app-pill"><span class="pill-dot" style="background:#f43f5e;"></span><span>UMKM Insight <small style="opacity:0.5;">Kel. 6</small></span><span class="pill-arrow">&#8594;</span></div>
+            </div>
+            <div class="ekosistem-center">
+              <div class="ekosistem-arrows">&#8596; &#8596; &#8596;</div>
+              <div class="gateway-badge">
+                <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                <div class="gw-label">API Gateway</div>
+                <div class="gw-desc">Validasi &middot; Fee 0.5% &middot; Routing</div>
+              </div>
+              <div class="ekosistem-arrows">&#8596; &#8596; &#8596;</div>
+            </div>
+            <div class="ekosistem-apps">
+              <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Aplikasi Penerima</div>
+              <div class="ekosistem-app-pill"><span class="pill-arrow" style="margin-left:0;margin-right:auto;">&#8592;</span><span>SmartBank</span><span class="pill-dot" style="background:#6366f1;margin-left:8px;"></span></div>
+              <div class="ekosistem-app-pill"><span class="pill-arrow" style="margin-left:0;margin-right:auto;">&#8592;</span><span>PasarKita</span><span class="pill-dot" style="background:#10b981;margin-left:8px;"></span></div>
+              <div class="ekosistem-app-pill"><span class="pill-arrow" style="margin-left:0;margin-right:auto;">&#8592;</span><span>WarungPOS</span><span class="pill-dot" style="background:#f59e0b;margin-left:8px;"></span></div>
+              <div class="ekosistem-app-pill"><span class="pill-arrow" style="margin-left:0;margin-right:auto;">&#8592;</span><span>SupplierHub</span><span class="pill-dot" style="background:#a855f7;margin-left:8px;"></span></div>
+              <div class="ekosistem-app-pill"><span class="pill-arrow" style="margin-left:0;margin-right:auto;">&#8592;</span><span>LogistiKita</span><span class="pill-dot" style="background:#22d3ee;margin-left:8px;"></span></div>
+              <div class="ekosistem-app-pill"><span class="pill-arrow" style="margin-left:0;margin-right:auto;">&#8592;</span><span>UMKM Insight</span><span class="pill-dot" style="background:#f43f5e;margin-left:8px;"></span></div>
+            </div>
+          </div>
+          <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:16px;">Setiap transaksi melewati API Gateway &bull; Validasi JWT &bull; Pencatatan otomatis &bull; Biaya layanan 0.5%</p>
+        </div>
+
+        <!-- Panduan Cepat -->
+        <div class="glass-card" style="border-left: 4px solid var(--accent-blue);">
+          <div class="card-header">
+            <div class="card-title" style="color: var(--accent-blue-light);">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              </span>
+              Panduan Mulai Cepat
+            </div>
+          </div>
+          <div class="panduan-steps">
+            <div class="panduan-step-card">
+              <div class="panduan-num" style="background:rgba(99,102,241,0.15);color:var(--accent-blue-light);">1</div>
+              <div style="font-size:12px;font-weight:700;color:var(--accent-cyan);text-transform:uppercase;margin-bottom:6px;">Token Akses</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Buat Token JWT</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Generate token agar request Anda dikenali Gateway selama 30 menit.</div>
+              <button class="btn btn-outline" onclick="showPage('token')" style="margin-top:12px;padding:6px 12px;font-size:12px;">Buat Sekarang</button>
+            </div>
+            <div class="panduan-step-card">
+              <div class="panduan-num" style="background:rgba(16,185,129,0.15);color:var(--accent-emerald);">2</div>
+              <div style="font-size:12px;font-weight:700;color:var(--accent-emerald);text-transform:uppercase;margin-bottom:6px;">SmartBank</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Kirim Pembayaran</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Kirim ke SmartBank. Fee 0.5% dipotong otomatis oleh Gateway.</div>
+              <button class="btn btn-outline" onclick="showPage('transaksi')" id="btnQuickTransaksi" style="margin-top:12px;padding:6px 12px;font-size:12px;">Kirim Sekarang</button>
+            </div>
+            <div class="panduan-step-card">
+              <div class="panduan-num" style="background:rgba(168,85,247,0.15);color:var(--accent-purple);">3</div>
+              <div style="font-size:12px;font-weight:700;color:var(--accent-purple);text-transform:uppercase;margin-bottom:6px;">Ekosistem</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Hubungkan Semua App</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Kirim ke Marketplace, POS, SupplierHub, atau UMKM Insight.</div>
+              <button class="btn btn-outline" onclick="showPage('universal')" style="margin-top:12px;padding:6px 12px;font-size:12px;">Pilih Tujuan</button>
+            </div>
+            <div class="panduan-step-card">
+              <div class="panduan-num" style="background:rgba(245,158,11,0.15);color:var(--accent-amber);">4</div>
+              <div style="font-size:12px;font-weight:700;color:var(--accent-amber);text-transform:uppercase;margin-bottom:6px;">Monitor</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px;">Status Ekosistem</div>
+              <div style="font-size:12px;color:var(--text-secondary);">Pantau status live semua 6 aplikasi dan histori transaksi real-time.</div>
+              <button class="btn btn-outline" onclick="window.location.href='/monitor'" style="margin-top:12px;padding:6px 12px;font-size:12px;">Lihat Monitor</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== GENERATE TOKEN ========== -->
+      <section class="page-section" id="page-token">
+        <div class="page-header">
+          <h2>
+            <span class="ph-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            </span>
+            Generate Token JWT
+          </h2>
+          <p>Buat token otentikasi untuk mengakses API Gateway</p>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              Identitas Pengguna
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="tokenUserId">User ID</label>
+            <input type="text" class="form-input" id="tokenUserId" placeholder="Masukkan User ID, contoh: konsumen_001">
+          </div>
+
+          <button class="btn btn-primary" onclick="generateToken()" id="btnGenerateToken">
+            <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            Generate Token
+          </button>
+
+          <div id="tokenResult" style="display:none;">
+            <div class="token-display" style="margin-top: 20px;">
+              <code id="tokenValue"></code>
+              <button class="copy-btn" onclick="copyToken()" title="Salin Token">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+            </div>
+            <p style="margin-top: 10px; font-size: 13px; color: var(--text-muted);">
+              Token berlaku selama 30 menit. Gunakan token ini untuk autentikasi transaksi.
+            </p>
+          </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </span>
+              Tentang JWT Token
+            </div>
+          </div>
+          <table class="data-table">
+            <tbody>
+              <tr>
+                <td><strong>Algoritma</strong></td>
+                <td>HS256 (HMAC SHA-256)</td>
+              </tr>
+              <tr>
+                <td><strong>Masa Berlaku</strong></td>
+                <td>30 menit sejak dibuat</td>
+              </tr>
+              <tr>
+                <td><strong>Payload</strong></td>
+                <td>user_id, exp (expiration)</td>
+              </tr>
+              <tr>
+                <td><strong>Kegunaan</strong></td>
+                <td>Autentikasi request ke API Gateway</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========== KIRIM TRANSAKSI ========== -->
+      <section class="page-section" id="page-transaksi">
+        <div class="page-header">
+          <h2>
+            <span class="ph-icon">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </span>
+            Kirim Transaksi
+          </h2>
+          <p>Kirim request transaksi melalui API Gateway ke SmartBank</p>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </span>
+              Form Transaksi
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="txUserId">User ID</label>
+              <input type="text" class="form-input" id="txUserId" placeholder="konsumen_001">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="txAmount">Jumlah (Rp)</label>
+              <input type="number" class="form-input" id="txAmount" placeholder="100000" min="0">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="txToken">Token JWT</label>
+            <input type="text" class="form-input" id="txToken" placeholder="Tempel token JWT di sini...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="txMetadata">Metadata Tambahan (JSON, opsional)</label>
+            <textarea class="form-input" id="txMetadata" placeholder='{"keterangan": "Pembayaran produk"}'></textarea>
+          </div>
+
+          <div id="txFeePreview" style="display:none;">
+            <div class="fee-display">
+              <span class="fee-label">Estimasi Fee Gateway (0.5%)</span>
+              <span class="fee-value" id="txFeeValue">Rp 0</span>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; display: flex; gap: 12px;">
+            <button class="btn btn-success" onclick="kirimTransaksi()" id="btnKirimTransaksi">
+              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Kirim Transaksi
+            </button>
+            <button class="btn btn-outline" onclick="resetForm()" id="btnResetForm">
+              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Response -->
+        <div class="glass-card" id="txResponseCard" style="display:none;">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 13 15 11 9 8 12 2 12"/></svg>
+              </span>
+              Respons Server
+            </div>
+          </div>
+          <div class="response-panel">
+            <div class="response-header">
+              <div class="response-status" id="txResponseStatus">
+                <span class="status-pill"></span>
+                Menunggu...
+              </div>
+              <span style="font-size: 12px; color: var(--text-muted);" id="txResponseTime"></span>
+            </div>
+            <div class="response-body" id="txResponseBody">-</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== KALKULATOR FEE ========== -->
+      <section class="page-section" id="page-fee">
+        <div class="page-header">
+          <h2>
+            <span class="ph-icon">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </span>
+            Kalkulator Fee Gateway
+          </h2>
+          <p>Hitung biaya layanan gateway untuk setiap transaksi</p>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/><path d="M9 15h3l8.5-8.5a1.5 1.5 0 0 0-3-3L9 12v3"/></svg>
+              </span>
+              Hitung Fee
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="feeAmount">Jumlah Transaksi (Rp)</label>
+            <input type="number" class="form-input" id="feeAmount"
+              placeholder="Masukkan jumlah, contoh: 1000000" min="0" oninput="hitungFeePreview()">
+          </div>
+
+          <div class="fee-display">
+            <div>
+              <div class="fee-label">Fee Gateway (0.5%)</div>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Dipotong otomatis dari setiap transaksi</div>
+            </div>
+            <div class="fee-value" id="feeResult">Rp 0</div>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <div class="fee-display" style="background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.15);">
+              <span class="fee-label">Total yang Diteruskan ke SmartBank</span>
+              <span class="fee-value" id="feeNet" style="color: var(--accent-emerald);">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              </span>
+              Tabel Simulasi Fee
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Jumlah Transaksi</th>
+                <th>Fee (0.5%)</th>
+                <th>Diteruskan ke SmartBank</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Rp 50.000</td><td>Rp 250</td><td>Rp 49.750</td></tr>
+              <tr><td>Rp 100.000</td><td>Rp 500</td><td>Rp 99.500</td></tr>
+              <tr><td>Rp 500.000</td><td>Rp 2.500</td><td>Rp 497.500</td></tr>
+              <tr><td>Rp 1.000.000</td><td>Rp 5.000</td><td>Rp 995.000</td></tr>
+              <tr><td>Rp 5.000.000</td><td>Rp 25.000</td><td>Rp 4.975.000</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========== ALUR SISTEM ========== -->
+      <section class="page-section" id="page-alur">
+        <div class="page-header">
+          <h2>
+            <span class="ph-icon">
+              <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            </span>
+            Alur Kerja Sistem
+          </h2>
+          <p>Bagaimana setiap request diproses di dalam API Gateway</p>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
+              </span>
+              Step-by-Step Proses
+            </div>
+          </div>
+
+          <div class="alur-step">
+            <div class="alur-step-num">1</div>
+            <div class="alur-step-content">
+              <strong>Validasi Request (JWT)</strong>
+              <p>Token JWT diperiksa keasliannya menggunakan algoritma HS256. Jika kadaluarsa atau palsu, request langsung ditolak.</p>
+            </div>
+          </div>
+
+          <div class="alur-step">
+            <div class="alur-step-num">2</div>
+            <div class="alur-step-content">
+              <strong>Rate Limiting</strong>
+              <p>Sistem membatasi maksimal 30 request per 60 detik per user untuk mencegah penyalahgunaan dan serangan DDoS.</p>
+            </div>
+          </div>
+
+          <div class="alur-step">
+            <div class="alur-step-num">3</div>
+            <div class="alur-step-content">
+              <strong>Logging ke Database</strong>
+              <p>Setiap request yang masuk dicatat di database MySQL untuk keperluan audit, monitoring, dan analitik real-time.</p>
+            </div>
+          </div>
+
+          <div class="alur-step">
+            <div class="alur-step-num">4</div>
+            <div class="alur-step-content">
+              <strong>Hitung Biaya Layanan (Fee 0.5%)</strong>
+              <p>Gateway menghitung fee 0.5% dari jumlah transaksi secara otomatis sebagai biaya layanan integrasi.</p>
+            </div>
+          </div>
+
+          <div class="alur-step">
+            <div class="alur-step-num">5</div>
+            <div class="alur-step-content">
+              <strong>Routing ke SmartBank (Backtracking)</strong>
+              <p>Data transaksi diteruskan ke SmartBank menggunakan algoritma backtracking failover — jika primary route gagal, otomatis backtrack ke alternatif.</p>
+            </div>
+          </div>
+
+          <div class="alur-step">
+            <div class="alur-step-num">6</div>
+            <div class="alur-step-content">
+              <strong>Respons ke Konsumen</strong>
+              <p>Hasil dari SmartBank dikembalikan ke konsumen beserta info fee, trace backtracking, dan catatan integrator.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== DOKUMENTASI ========== -->
+      <section class="page-section" id="page-docs">
+        <div class="page-header">
+          <h2>
+            <span class="ph-icon">
+              <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </span>
+            Dokumentasi API
+          </h2>
+          <p>Referensi endpoint yang tersedia di API Gateway</p>
+        </div>
+
+        <!-- Endpoint 1 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="badge badge-success">GET</span>
+              /generate_token_tester/{user_id}
+            </div>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">Generate token JWT untuk testing. Token berlaku 30 menit.</p>
+          <table class="data-table">
+            <thead>
+              <tr><th>Parameter</th><th>Tipe</th><th>Keterangan</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>user_id</td>
+                <td><span class="badge badge-info">string</span></td>
+                <td>ID pengguna (path parameter)</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="response-panel" style="margin-top: 16px;">
+            <div class="response-header">
+              <div class="response-status success">
+                <span class="status-pill"></span>
+                Response 200 OK
+              </div>
+            </div>
+            <div class="response-body">{ "token_buat_ngetes": "eyJhbGciOiJIUzI1NiIs..." }</div>
+          </div>
+        </div>
+
+        <!-- Endpoint 2 -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="badge badge-error">POST</span>
+              /integrator/routing_api
+            </div>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">Kirim transaksi melalui gateway ke SmartBank. Request divalidasi, di-log, dihitung fee-nya, lalu diteruskan.</p>
+          <table class="data-table">
+            <thead>
+              <tr><th>Field</th><th>Tipe</th><th>Keterangan</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>user_id</td><td><span class="badge badge-info">string</span></td><td>ID pengguna</td></tr>
+              <tr><td>parameter.token</td><td><span class="badge badge-info">string</span></td><td>Token JWT untuk autentikasi</td></tr>
+              <tr><td>parameter.amount</td><td><span class="badge badge-info">number</span></td><td>Jumlah transaksi</td></tr>
+            </tbody>
+          </table>
+          <div class="response-panel" style="margin-top: 16px;">
+            <div class="response-header">
+              <div class="response-status success"><span class="status-pill"></span> Response Sukses</div>
+            </div>
+            <div class="response-body">{ "status": "sukses", "data": { "integrator_note": "...", "fee_diambil": 500.0, "respons_dari_smartbank": { ... } } }</div>
+          </div>
+        </div>
+
+        <!-- Endpoint 3: Universal Routing -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="badge badge-error">POST</span>
+              /integrator/routing_universal
+            </div>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">Forward request ke app UMKM manapun. Wajib isi <code>target_app</code>. Sudah include rate limiting, validasi JWT, dan logging otomatis.</p>
+          <table class="data-table">
+            <thead><tr><th>Field</th><th>Tipe</th><th>Keterangan</th></tr></thead>
+            <tbody>
+              <tr><td>user_id</td><td><span class="badge badge-info">string</span></td><td>ID pengguna</td></tr>
+              <tr><td>parameter.token</td><td><span class="badge badge-info">string</span></td><td>Token JWT</td></tr>
+              <tr><td>parameter.target_app</td><td><span class="badge badge-info">string</span></td><td>ID app tujuan (smartbank/marketplace/pos/supplierhub/logistikita/umkminsight)</td></tr>
+              <tr><td>parameter.amount</td><td><span class="badge badge-info">number</span></td><td>Jumlah transaksi (opsional)</td></tr>
+              <tr><td>parameter.target_endpoint</td><td><span class="badge badge-info">string</span></td><td>Override endpoint tujuan (opsional)</td></tr>
+            </tbody>
+          </table>
+          <div class="response-panel" style="margin-top: 16px;">
+            <div class="response-header"><div class="response-status success"><span class="status-pill"></span> Response Sukses</div></div>
+            <div class="response-body">{ "status": "sukses", "data": { "target_app": "marketplace", "fee_gateway": 250, "fee_persen": "0.5%", "response_time_ms": 42 } }</div>
+          </div>
+        </div>
+
+        <!-- Endpoint 4: Daftar Route -->
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="badge badge-success">GET</span>
+              /integrator/daftar_route
+            </div>
+          </div>
+          <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 14px;">Tampilkan routing table — daftar semua app yang terdaftar di Gateway beserta URL dan endpoint default.</p>
+          <div class="response-panel">
+            <div class="response-header"><div class="response-status success"><span class="status-pill"></span> Response 200</div></div>
+            <div class="response-body">{ "status": "sukses", "data": { "total_app": 6, "daftar_app": [ { "app_id": "smartbank", "kelompok": "Kelompok 1", "base_url": "http://...", "default_endpoint": "/smartbank/pembayaran_transaksi" }, ... ] } }</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== UNIVERSAL ROUTING ========== -->
+      <section class="page-section" id="page-universal">
+        <div class="page-header">
+          <h2>
+            <span class="ph-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </span>
+            Universal Routing
+          </h2>
+          <p>Forward request ke app UMKM manapun — dengan rate limiting, validasi, dan logging otomatis</p>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              </span>
+              Form Universal Routing
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="urUserId">User ID</label>
+              <input type="text" class="form-input" id="urUserId" placeholder="user123">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="urAmount">Jumlah (Rp)</label>
+              <input type="number" class="form-input" id="urAmount" placeholder="50000" min="0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="urTargetApp">Target App</label>
+              <select class="form-input" id="urTargetApp" style="cursor:pointer;">
+                <option value="smartbank">SmartBank — Kelompok 1</option>
+                <option value="marketplace">Marketplace (PasarKita) — Kelompok 2</option>
+                <option value="pos">POS (WarungPOS) — Kelompok 3</option>
+                <option value="supplierhub">SupplierHub — Kelompok 4</option>
+                <option value="logistikita">LogistiKita — Kelompok 5</option>
+                <option value="umkminsight">UMKM Insight — Kelompok 6</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="urSourceApp">Source App (opsional)</label>
+              <input type="text" class="form-input" id="urSourceApp" placeholder="marketplace">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="urToken">Token JWT</label>
+            <input type="text" class="form-input" id="urToken" placeholder="Tempel token JWT di sini...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="urEndpoint">Override Endpoint (opsional)</label>
+            <input type="text" class="form-input" id="urEndpoint" placeholder="Kosongkan untuk pakai endpoint default app">
+          </div>
+
+          <div style="margin-top: 20px; display:flex; gap:12px;">
+            <button class="btn btn-primary" onclick="kirimUniversalRouting()" id="btnUniversalRouting">
+              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Kirim via Universal Routing
+            </button>
+            <button class="btn btn-outline" onclick="document.getElementById('urToken').value=''" id="btnUrReset">
+              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              Reset Token
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card" id="urResponseCard" style="display:none;">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><polyline points="22 12 16 12 13 15 11 9 8 12 2 12"/></svg>
+              </span>
+              Respons Gateway
+            </div>
+          </div>
+          <div class="response-panel">
+            <div class="response-header">
+              <div class="response-status" id="urResponseStatus">
+                <span class="status-pill"></span>
+                Menunggu...
+              </div>
+              <span style="font-size:12px; color:var(--text-muted);" id="urResponseTime"></span>
+            </div>
+            <div class="response-body" id="urResponseBody">-</div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title">
+              <span class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              </span>
+              Routing Table — Semua App Terdaftar
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr><th>App ID</th><th>Kelompok</th><th>Base URL</th><th>Default Endpoint</th></tr>
+            </thead>
+            <tbody id="routingTableBody">
+              <tr><td colspan="4" style="text-align:center; color:var(--text-muted);">Memuat routing table...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/script.js"></script>
+  <script>
+    // ================================================
+    // UNIVERSAL ROUTING
+    // ================================================
+    async function kirimUniversalRouting() {
+      const userId    = document.getElementById('urUserId').value.trim();
+      const amount    = parseFloat(document.getElementById('urAmount').value) || 0;
+      const targetApp = document.getElementById('urTargetApp').value;
+      const sourceApp = document.getElementById('urSourceApp').value.trim();
+      const token     = document.getElementById('urToken').value.trim();
+      const endpoint  = document.getElementById('urEndpoint').value.trim();
+
+      if (!userId || !token) {
+        alert('User ID dan Token JWT wajib diisi!');
+        return;
+      }
+
+      const btn = document.getElementById('btnUniversalRouting');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Mengirim...';
+
+      const card = document.getElementById('urResponseCard');
+      card.style.display = 'block';
+      document.getElementById('urResponseStatus').innerHTML = '<span class="status-pill" style="background:var(--accent-amber);"></span> Mengirim ke ' + targetApp + '...';
+      document.getElementById('urResponseStatus').className = 'response-status pending';
+      document.getElementById('urResponseBody').textContent = '-';
+      document.getElementById('urResponseTime').textContent = '';
+
+      const startTime = Date.now();
+      const param = { token, target_app: targetApp, amount };
+      if (sourceApp) param.source_app = sourceApp;
+      if (endpoint)  param.target_endpoint = endpoint;
+
+      try {
+        const res  = await fetch('/integrator/routing_universal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, parameter: param })
+        });
+        const data    = await res.json();
+        const elapsed = Date.now() - startTime;
+        const ok      = data.status === 'sukses';
+        const kode    = data.data?.kode || '';
+
+        document.getElementById('urResponseStatus').innerHTML = ok
+          ? '<span class="status-pill" style="background:var(--accent-emerald);"></span> Sukses — Gateway berhasil forward ke ' + targetApp
+          : '<span class="status-pill" style="background:var(--accent-rose);"></span> Gagal — ' + (kode || data.data?.pesan || 'Error');
+        document.getElementById('urResponseStatus').className = 'response-status ' + (ok ? 'success' : 'error');
+        document.getElementById('urResponseTime').textContent = elapsed + 'ms';
+        document.getElementById('urResponseBody').textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        document.getElementById('urResponseStatus').innerHTML = '<span class="status-pill" style="background:var(--accent-rose);"></span> Network Error';
+        document.getElementById('urResponseStatus').className = 'response-status error';
+        document.getElementById('urResponseBody').textContent = e.message;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Kirim via Universal Routing`;
+      }
+    }
+
+    // ================================================
+    // ROUTING TABLE
+    // ================================================
+    async function loadRoutingTable() {
+      try {
+        const res  = await fetch('/integrator/daftar_route');
+        const data = await res.json();
+        const apps = data.data?.daftar_app || [];
+
+        const statEl = document.getElementById('statApps');
+        if (statEl) statEl.textContent = data.data?.total_app || apps.length;
+
+        const tbody = document.getElementById('routingTableBody');
+        if (tbody && apps.length) {
+          tbody.innerHTML = apps.map(app => `
+            <tr>
+              <td><strong>${app.app_id}</strong></td>
+              <td>${app.kelompok}</td>
+              <td><code style="font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--accent-cyan);">${app.base_url}</code></td>
+              <td><code style="font-size:12px; font-family:'JetBrains Mono',monospace; color:var(--text-muted);">${app.default_endpoint}</code></td>
+            </tr>`).join('');
+        }
+      } catch (e) {
+        console.warn('Gagal load routing table:', e);
+      }
+    }
+
+    async function loadLiveStats() {
+      try {
+        const res = await fetch('/monitor/request-stats');
+        const data = await res.json();
+        const el = document.getElementById('statTxToday');
+        if (el && data.data) {
+          el.textContent = data.data.total_requests || data.data.jumlah_request || data.data.today || '—';
+        }
+      } catch (e) {
+        const el = document.getElementById('statTxToday');
+        if (el && el.textContent === '—') el.textContent = '—';
+      }
+    }
+
+    const APP_ENDPOINTS = {
+      smartbank:   '/smartbank/pembayaran_transaksi',
+      marketplace: '/marketplace/checkout',
+      pos:         '/pos/transaksi',
+      supplierhub: '/supplier/order_bahan',
+      logistikita: '/logistik/request_pengiriman',
+      umkminsight: '/api/transactions.php',
+    };
+    function updateEndpointHint() {
+      const app = document.getElementById('urTargetApp')?.value;
+      const hint = document.getElementById('endpointHint');
+      if (hint && app) hint.textContent = APP_ENDPOINTS[app] || '/';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadRoutingTable();
+      loadLiveStats();
+      setInterval(loadLiveStats, 30000);
+    });
+  </script>
+
+</body>
+
+</html>

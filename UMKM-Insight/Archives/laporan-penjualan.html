@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Insight — Laporan Penjualan</title>
+    <link rel="stylesheet" href="shared.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}}}}}</script>
+    <style>
+        body{display:flex;height:100vh;overflow:hidden;}
+        .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .main-content{flex:1;overflow-y:auto;padding:24px;background:var(--surface);}
+        .chart-card{padding:24px;}
+        .chart-card h3{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        .filter-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;padding:20px;margin-bottom:24px;}
+        .filter-bar .form-group{min-width:160px;flex:1;}
+        .source-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:600;background:#ecfdf5;color:#059669;border:1px solid #bbf7d0;}
+        .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+        @media(max-width:1024px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+    <div class="main-wrap">
+        <div id="topbar-container"></div>
+        <div class="main-content">
+            <!-- Header -->
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px;" class="animate-fade-in">
+                <div>
+                    <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);letter-spacing:-0.02em;">Laporan Penjualan</h1>
+                    <p style="font-size:.8125rem;color:var(--text-secondary);margin-top:4px;display:flex;align-items:center;gap:8px;">Analisis pendapatan dan tren penjualan <span class="source-badge"><i class="ph-fill ph-bank"></i> SmartBank</span></p>
+                </div>
+                <button onclick="location.reload()" class="btn btn-outline btn-sm"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+            </div>
+
+            <!-- Filter -->
+            <div class="card filter-bar animate-fade-in delay-100">
+                <div class="form-group"><label class="form-label">Mulai</label><input type="date" class="form-input" id="f-start"></div>
+                <div class="form-group"><label class="form-label">Sampai</label><input type="date" class="form-input" id="f-end"></div>
+                <div class="form-group"><label class="form-label">Tipe Transaksi</label>
+                    <select class="form-select" id="f-type"><option value="all">Semua</option><option>Penjualan</option><option>Potongan Fee</option><option>Pembelian Stok</option></select>
+                </div>
+                <div><button class="btn btn-primary btn-sm" onclick="applyFilter()"><i class="ph ph-funnel"></i> Filter</button></div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid-3 animate-fade-in delay-200" id="kpi-area"></div>
+
+            <!-- FREE: Basic Charts -->
+            <div class="grid-2 animate-fade-in delay-300">
+                <div class="card chart-card"><h3><i class="ph ph-chart-line" style="color:var(--brand-600);"></i> Tren Pendapatan Bulanan</h3><div style="height:280px;"><canvas id="chart-monthly"></canvas></div></div>
+                <div class="card chart-card"><h3><i class="ph ph-chart-pie" style="color:var(--brand-600);"></i> Sumber Pendapatan</h3><div style="height:220px;"><canvas id="chart-source"></canvas></div>
+                    <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px;" id="source-legend"></div>
+                </div>
+            </div>
+
+            <!-- PREMIUM: Advanced Charts -->
+            <div class="grid-2 animate-fade-in delay-400" id="premium-charts" style="position:relative;">
+                <div class="card chart-card"><h3><i class="ph ph-chart-bar" style="color:#6366f1;"></i> Perbandingan Multi-Periode <span class="badge badge-premium" style="font-size:.625rem;">PRO</span></h3><div style="height:280px;"><canvas id="chart-compare"></canvas></div></div>
+                <div class="card chart-card"><h3><i class="ph ph-lightning" style="color:#f59e0b;"></i> Analisis Pertumbuhan <span class="badge badge-premium" style="font-size:.625rem;">PRO</span></h3>
+                    <div id="growth-analysis" style="display:flex;flex-direction:column;gap:12px;"></div>
+                </div>
+            </div>
+
+            <!-- Transaction Table -->
+            <div class="card animate-fade-in delay-500" style="overflow:hidden;margin-bottom:24px;">
+                <div style="padding:20px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;">
+                    <div><h3 style="font-size:1rem;font-weight:700;">Riwayat Transaksi</h3><p style="font-size:.6875rem;color:var(--text-muted);margin-top:2px;">Sumber: Ledger SmartBank (Read-only)</p></div>
+                    <div style="display:flex;gap:8px;" id="export-area"></div>
+                </div>
+                <div style="overflow-x:auto;max-height:400px;overflow-y:auto;"><table class="data-table"><thead><tr><th>ID</th><th>Tanggal</th><th>Tipe</th><th>Sumber</th><th style="text-align:right;">Nominal</th><th>Status</th></tr></thead><tbody id="trx-body"></tbody></table></div>
+            </div>
+
+            <footer style="text-align:center;font-size:.75rem;color:var(--text-muted);padding:16px;border-top:1px solid var(--border);">&copy; 2026 Ekosistem Ekonomi UMKM</footer>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const user = initPage('laporan', 'client');
+        if (!user) throw new Error('Auth');
+        document.getElementById('sidebar-container').innerHTML = buildSidebar('laporan');
+        document.getElementById('topbar-container').innerHTML = buildTopbar(user);
+
+        const premium = isPremium(user);
+        const data = generateSalesData();
+
+        // Dates
+        const today = new Date();
+        const start = new Date(today); start.setMonth(start.getMonth() - 3);
+        document.getElementById('f-start').valueAsDate = start;
+        document.getElementById('f-end').valueAsDate = today;
+
+        // KPIs
+        document.getElementById('kpi-area').innerHTML = [
+            {l:'Total Pendapatan',v:formatRupiah(data.kpi.revenue),icon:'ph-wallet',bg:'#ecfdf5',c:'#059669',t:'+12.5%',up:true},
+            {l:'Total Transaksi',v:formatNumber(data.kpi.transactions),icon:'ph-receipt',bg:'#eff6ff',c:'#2563eb',t:'+5.2%',up:true},
+            {l:'Rata-rata per Transaksi',v:formatRupiah(Math.floor(data.kpi.revenue/data.kpi.transactions)),icon:'ph-equals',bg:'#faf5ff',c:'#7c3aed',t:'+3.1%',up:true}
+        ].map(k=>`<div class="card kpi-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="kpi-label">${k.l}</span><div class="kpi-icon" style="background:${k.bg};color:${k.c};"><i class="ph ${k.icon}"></i></div></div><div class="kpi-value">${k.v}</div><div class="kpi-trend ${k.up?'up':'down'}"><i class="ph ${k.up?'ph-trend-up':'ph-trend-down'}"></i> ${k.t}</div></div>`).join('');
+
+        // Charts
+        Chart.defaults.font.family = "'Inter'";
+        Chart.defaults.color = '#94a3b8';
+
+        // Monthly Trend (Free)
+        new Chart(document.getElementById('chart-monthly'), {type:'line',data:{labels:data.monthly.labels.slice(0, premium ? 12 : 3),datasets:[{label:'Pendapatan',data:data.monthly.data.slice(0, premium ? 12 : 3),borderColor:'#14b8a6',backgroundColor:'rgba(20,184,166,0.08)',borderWidth:2,fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#14b8a6'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>formatRupiah(ctx.raw)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+(v/1e6)+'M'},grid:{borderDash:[2,4],color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+
+        // Source Doughnut (Free)
+        const colors = ['#14b8a6','#3b82f6','#fb923c'];
+        new Chart(document.getElementById('chart-source'), {type:'doughnut',data:{labels:data.sources.labels,datasets:[{data:data.sources.data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.label+': '+ctx.raw+'%'}}}}});
+        document.getElementById('source-legend').innerHTML = data.sources.labels.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:.8125rem;"><span style="width:10px;height:10px;border-radius:50%;background:${colors[i]};flex-shrink:0;"></span>${l} — ${data.sources.data[i]}%</div>`).join('');
+
+        // PREMIUM sections
+        if (!premium) {
+            renderPremiumLock('premium-charts', 'Analisis Lanjutan');
+        } else {
+            // Multi-period comparison
+            new Chart(document.getElementById('chart-compare'), {type:'bar',data:{labels:['Q1','Q2','Q3','Q4'],datasets:[{label:'2025',data:[28e6,32e6,35e6,30e6],backgroundColor:'rgba(99,102,241,0.3)',borderColor:'#6366f1',borderWidth:1,borderRadius:4},{label:'2026',data:[35e6,42e6,38e6,45e6],backgroundColor:'rgba(20,184,166,0.5)',borderColor:'#14b8a6',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+(v/1e6)+'M'},grid:{borderDash:[2,4]}},x:{grid:{display:false}}}}});
+
+            // Growth analysis
+            const growthItems = [{label:'Pertumbuhan Bulanan',value:'+12.5%',color:'var(--success)',desc:'Pendapatan naik dibanding bulan lalu'},{label:'Pertumbuhan Tahunan',value:'+34.2%',color:'var(--success)',desc:'YoY growth dari total revenue'},{label:'Tingkat Retensi',value:'87%',color:'var(--info)',desc:'Pelanggan yang bertransaksi ulang'},{label:'Anomali Terdeteksi',value:'2',color:'var(--warning)',desc:'Lonjakan tidak biasa pada Sab-Min'}];
+            document.getElementById('growth-analysis').innerHTML = growthItems.map(g=>`<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface-alt);border-radius:var(--radius-lg);border:1px solid var(--border-light);"><div style="font-size:1.25rem;font-weight:800;color:${g.color};min-width:70px;">${g.value}</div><div><p style="font-size:.8125rem;font-weight:600;color:var(--text-primary);">${g.label}</p><p style="font-size:.6875rem;color:var(--text-muted);">${g.desc}</p></div></div>`).join('');
+
+            document.getElementById('export-area').innerHTML = '<button class="btn btn-outline btn-sm"><i class="ph ph-download-simple"></i> Export CSV</button>';
+        }
+
+        // Transaction Table
+        const trxList = premium ? data.transactions : data.transactions.slice(0,10);
+        document.getElementById('trx-body').innerHTML = trxList.map(t=>{const neg=t.amount<0;return `<tr><td style="font-family:monospace;font-size:.75rem;color:var(--text-muted);">${t.id}</td><td style="font-size:.8125rem;">${t.date}</td><td style="font-weight:500;">${t.type}</td><td><span class="badge badge-neutral">${t.source}</span></td><td style="text-align:right;font-weight:600;color:${neg?'var(--error)':'var(--success)'};">${neg?'- ':'+ '}${formatRupiah(Math.abs(t.amount))}</td><td><span class="badge badge-success"><i class="ph-fill ph-check-circle"></i> ${t.status}</span></td></tr>`;}).join('');
+
+        if (!premium && data.transactions.length > 10) {
+            document.getElementById('trx-body').innerHTML += '<tr><td colspan="6" style="text-align:center;padding:20px;"><div class="premium-lock-badge" style="position:relative;transform:none;display:inline-flex;cursor:pointer;" onclick="showToast(\'Upgrade ke Premium untuk melihat semua transaksi\',\'info\')"><i class="ph-fill ph-crown"></i> Lihat semua transaksi — Premium</div></td></tr>';
+        }
+
+        function applyFilter() { showToast('Filter diterapkan — data diperbarui', 'success'); }
+    </script>
+</body>
+</html>

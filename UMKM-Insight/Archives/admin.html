@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Insight — Admin Panel</title>
+    <link rel="stylesheet" href="shared.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}}}}}</script>
+    <style>
+        body{display:flex;height:100vh;overflow:hidden;background:var(--surface);}
+        .admin-sidebar{width:260px;min-width:260px;background:linear-gradient(180deg,#0f172a,#1e293b);display:flex;flex-direction:column;height:100vh;}
+        .admin-sidebar .brand{height:64px;display:flex;align-items:center;padding:0 24px;gap:10px;border-bottom:1px solid rgba(255,255,255,0.1);}
+        .admin-sidebar .brand i{font-size:1.5rem;color:var(--brand-400);}
+        .admin-sidebar .brand span{font-weight:700;font-size:1.125rem;color:white;}
+        .admin-sidebar .brand small{font-size:.625rem;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.1em;margin-left:auto;background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;}
+        .admin-sidebar nav{flex:1;padding:16px 12px;}
+        .admin-sidebar nav a{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:var(--radius-lg);font-size:.875rem;font-weight:500;color:rgba(255,255,255,0.6);text-decoration:none;transition:all .15s;margin-bottom:4px;}
+        .admin-sidebar nav a:hover{background:rgba(255,255,255,0.08);color:white;}
+        .admin-sidebar nav a.active{background:rgba(20,184,166,0.15);color:var(--brand-400);}
+        .admin-sidebar nav a i{font-size:1.25rem;}
+        .admin-sidebar .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,0.1);}
+        .admin-sidebar .sidebar-footer button{width:100%;display:flex;align-items:center;gap:8px;padding:10px 14px;background:transparent;border:none;color:rgba(255,255,255,0.5);font-size:.875rem;cursor:pointer;border-radius:var(--radius-lg);transition:all .15s;}
+        .admin-sidebar .sidebar-footer button:hover{background:rgba(255,255,255,0.08);color:white;}
+
+        .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .main-content{flex:1;overflow-y:auto;padding:24px;}
+        .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+        .user-table-wrap{overflow-x:auto;}
+        .action-btn{padding:6px 12px;border-radius:var(--radius-md);font-size:.75rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:4px;}
+        .action-btn:hover{transform:scale(1.02);}
+        .action-btn.upgrade{background:#ecfdf5;color:#059669;border:1px solid #bbf7d0;}
+        .action-btn.downgrade{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
+        .action-btn.notify{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;}
+
+        /* Modal */
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:center;justify-content:center;animation:fadeIn .2s ease-out;}
+        .modal-overlay.open{display:flex;}
+        .modal{background:white;border-radius:var(--radius-2xl);padding:32px;max-width:480px;width:90%;box-shadow:var(--shadow-xl);animation:fadeIn .3s ease-out;}
+        .modal h2{font-size:1.25rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+        .notif-history{max-height:200px;overflow-y:auto;}
+        .notif-log{padding:10px 12px;border-bottom:1px solid var(--border-light);font-size:.8125rem;}
+        .notif-log:last-child{border-bottom:none;}
+
+        @media(max-width:1024px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:768px){.admin-sidebar{display:none;}.stat-grid{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="brand"><i class="ph-fill ph-chart-polar"></i><span>UMKM Insight</span><small>Admin</small></div>
+        <nav>
+            <a href="#" class="active"><i class="ph ph-users-three"></i> Manajemen User & Staff</a>
+            <a href="#" onclick="showAuditLogs()"><i class="ph ph-list-magnifying-glass"></i> Audit Log Sistem</a>
+            <a href="#" onclick="document.getElementById('notif-history-modal').classList.add('open')"><i class="ph ph-bell-ringing"></i> Riwayat Notifikasi</a>
+        </nav>
+        <div class="sidebar-footer"><button onclick="logout()"><i class="ph ph-sign-out"></i> Keluar</button></div>
+    </aside>
+
+    <div class="main-wrap">
+        <!-- Topbar -->
+        <header class="app-topbar">
+            <div style="display:flex;align-items:center;gap:8px;font-size:.875rem;font-weight:600;color:var(--text-primary);"><i class="ph-fill ph-shield-check" style="color:var(--brand-600);"></i> Super Admin Panel</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:.8125rem;color:var(--text-muted);" id="admin-name"></span>
+                <div style="width:34px;height:34px;border-radius:50%;background:#0f172a;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.875rem;">A</div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="animate-fade-in" style="margin-bottom:24px;">
+                <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);">Manajemen Ekosistem UMKM</h1>
+                <p style="font-size:.8125rem;color:var(--text-secondary);margin-top:4px;">Kelola seluruh pengguna, staf operasional, dan parameter sistem dalam satu dashboard.</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stat-grid animate-fade-in delay-100" id="stats-grid"></div>
+
+            <!-- User Table -->
+            <div class="card animate-fade-in delay-200" style="overflow:hidden;margin-bottom:24px;">
+                <div style="padding:20px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                    <h2 style="font-size:1.125rem;font-weight:700;">Pengguna & Staff</h2>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" class="form-input" placeholder="Cari nama/email..." style="max-width:220px;padding:8px 12px;font-size:.8125rem;" id="search-input" oninput="renderTable()">
+                        <select class="form-select" style="max-width:140px;padding:8px 12px;font-size:.8125rem;" id="filter-role" onchange="renderTable()">
+                            <option value="all">Semua Role</option><option value="client">Konsumen (UMKM)</option><option value="operator">Operator</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="user-table-wrap">
+                    <table class="data-table" id="user-table">
+                        <thead><tr><th>Nama / Bisnis</th><th>Role</th><th>Kontak</th><th>Status / Tier</th><th style="text-align:center;">Aksi</th></tr></thead>
+                        <tbody id="user-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <footer style="text-align:center;font-size:.75rem;color:var(--text-muted);padding:16px;border-top:1px solid var(--border);">&copy; 2026 Ekosistem Ekonomi UMKM — Admin Panel</footer>
+        </div>
+    </div>
+
+    <!-- Notify Modal -->
+    <div class="modal-overlay" id="notify-modal">
+        <div class="modal">
+            <h2><i class="ph-fill ph-megaphone" style="color:var(--info);"></i> Kirim Notifikasi</h2>
+            <p style="font-size:.8125rem;color:var(--text-secondary);margin-bottom:16px;">Kepada: <strong id="notify-target-name"></strong></p>
+            <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">Judul</label>
+                <input type="text" class="form-input" id="notify-title" placeholder="Contoh: Promo Spesial!">
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label class="form-label">Pesan</label>
+                <textarea class="form-input" id="notify-message" rows="3" placeholder="Tulis pesan untuk pemilik UMKM..." style="resize:vertical;"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-outline btn-sm" onclick="closeModal('notify-modal')">Batal</button>
+                <button class="btn btn-primary btn-sm" onclick="sendNotification()"><i class="ph ph-paper-plane-tilt"></i> Kirim</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification History Modal -->
+    <div class="modal-overlay" id="notif-history-modal">
+        <div class="modal" style="max-width:560px;">
+            <h2><i class="ph-fill ph-clock-counter-clockwise" style="color:var(--warning);"></i> Riwayat Notifikasi</h2>
+            <div class="notif-history" id="notif-history-list"></div>
+            <div style="margin-top:16px;text-align:right;"><button class="btn btn-outline btn-sm" onclick="closeModal('notif-history-modal')">Tutup</button></div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        initData();
+        const session = getSession();
+        if (!session || session.role !== 'admin') { window.location.href = 'login.html'; throw new Error('Not admin'); }
+        const admin = getCurrentUser();
+        document.getElementById('admin-name').textContent = admin ? admin.nama : 'Admin';
+
+        let notifyTargetId = null;
+
+        function renderStats() {
+            const users = getUsers();
+            const clients = users.filter(u => u.role === 'client');
+            const operators = users.filter(u => u.role === 'operator');
+            const prem = clients.filter(c => c.tier === 'premium').length;
+            
+            document.getElementById('stats-grid').innerHTML = [
+                {l:'Total Konsumen',v:clients.length,icon:'ph-users-three',bg:'#eff6ff',c:'#2563eb'},
+                {l:'Staf Operator',v:operators.length,icon:'ph-user-gear',bg:'#f5f3ff',c:'#7c3aed'},
+                {l:'User Premium',v:prem,icon:'ph-crown',bg:'#fffbeb',c:'#d97706'},
+                {l:'Server Status',v:'Online',icon:'ph-activity',bg:'#ecfdf5',c:'#059669'}
+            ].map(k=>`<div class="card kpi-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="kpi-label">${k.l}</span><div class="kpi-icon" style="background:${k.bg};color:${k.c};"><i class="ph-fill ${k.icon}"></i></div></div><div class="kpi-value">${k.v}</div></div>`).join('');
+        }
+
+        function renderTable() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const roleFilter = document.getElementById('filter-role').value;
+            let users = getUsers().filter(u => u.role !== 'admin'); // Don't manage admins here
+            
+            if (search) users = users.filter(u => (u.bisnis||'').toLowerCase().includes(search) || u.email.toLowerCase().includes(search) || u.nama.toLowerCase().includes(search));
+            if (roleFilter !== 'all') users = users.filter(u => u.role === roleFilter);
+
+            document.getElementById('user-tbody').innerHTML = users.map(u => {
+                const isClient = u.role === 'client';
+                const isOp = u.role === 'operator';
+                
+                let badgeClass = isClient ? (u.tier === 'premium' ? 'badge-premium' : 'badge-free') : 'badge-info';
+                let badgeText = isClient ? u.tier.toUpperCase() : u.role.toUpperCase();
+
+                return `<tr>
+                    <td>
+                        <div>
+                            <p style="font-weight:600;font-size:.875rem;">${isClient ? u.bisnis : u.nama}</p>
+                            <p style="font-size:.6875rem;color:var(--text-muted);">${isClient ? u.nama : 'Insight Staff'}</p>
+                        </div>
+                    </td>
+                    <td><span class="badge ${isOp ? 'bg-purple-100 text-purple-700' : 'bg-slate-100'}">${u.role.toUpperCase()}</span></td>
+                    <td style="font-size:.8125rem;">${u.email}</td>
+                    <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                    <td style="text-align:center;">
+                        <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
+                            <button class="action-btn notify" onclick="openNotifyModal('${u.id}')"><i class="ph ph-bell"></i></button>
+                            ${isClient ? `
+                                <button class="action-btn upgrade" onclick="changeTier('${u.id}','premium')"><i class="ph ph-arrow-up"></i></button>
+                                <button class="action-btn downgrade" onclick="changeTier('${u.id}','free')"><i class="ph ph-arrow-down"></i></button>
+                            ` : `<button class="action-btn" style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;"><i class="ph ph-lock"></i></button>`}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function showAuditLogs() {
+            showToast('Audit Logs sedang diproses...', 'info');
+        }
+
+        function changeTier(userId, newTier) {
+            const users = getUsers();
+            const idx = users.findIndex(u => u.id === userId);
+            if (idx < 0) return;
+            users[idx].tier = newTier;
+            if (newTier === 'premium') {
+                const exp = new Date(); exp.setMonth(exp.getMonth() + 1);
+                users[idx].tierExpiry = exp.toISOString().split('T')[0];
+            } else {
+                users[idx].tierExpiry = null;
+            }
+            saveUsers(users);
+            renderStats();
+            renderTable();
+            showToast(`${users[idx].bisnis} diubah ke ${newTier === 'premium' ? 'Premium' : 'Free Tier'}`, 'success');
+
+            // Auto-notify on tier change
+            const notifs = getNotifications();
+            notifs.push({
+                id: 'N-' + Date.now(),
+                targetUserId: userId,
+                type: 'auto',
+                title: newTier === 'premium' ? '🎉 Upgrade ke Premium!' : 'Perubahan Tier',
+                message: newTier === 'premium' ? 'Selamat! Akun Anda telah di-upgrade ke Premium. Nikmati semua fitur lengkap.' : 'Akun Anda telah dikembalikan ke Free Tier.',
+                date: new Date().toISOString().split('T')[0],
+                read: false
+            });
+            saveNotifications(notifs);
+        }
+
+        function openNotifyModal(userId) {
+            notifyTargetId = userId;
+            const user = getUsers().find(u => u.id === userId);
+            document.getElementById('notify-target-name').textContent = user ? user.bisnis + ' (' + user.nama + ')' : userId;
+            document.getElementById('notify-title').value = '';
+            document.getElementById('notify-message').value = '';
+            document.getElementById('notify-modal').classList.add('open');
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        function sendNotification() {
+            const title = document.getElementById('notify-title').value.trim();
+            const message = document.getElementById('notify-message').value.trim();
+            if (!title || !message) { showToast('Judul dan pesan wajib diisi', 'warning'); return; }
+            const notifs = getNotifications();
+            notifs.push({
+                id: 'N-' + Date.now(),
+                targetUserId: notifyTargetId,
+                type: 'admin',
+                title: title,
+                message: message,
+                date: new Date().toISOString().split('T')[0],
+                read: false
+            });
+            saveNotifications(notifs);
+            closeModal('notify-modal');
+            showToast('Notifikasi berhasil dikirim!', 'success');
+            renderNotifHistory();
+        }
+
+        function renderNotifHistory() {
+            const notifs = getNotifications().sort((a,b) => b.date.localeCompare(a.date));
+            const users = getUsers();
+            document.getElementById('notif-history-list').innerHTML = notifs.length ? notifs.map(n => {
+                const target = users.find(u => u.id === n.targetUserId);
+                return `<div class="notif-log">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                        <span class="badge ${n.type==='admin'?'badge-info':'badge-warning'}" style="font-size:.625rem;">${n.type==='admin'?'Manual':'Otomatis'}</span>
+                        <span style="font-size:.6875rem;color:var(--text-muted);">${n.date}</span>
+                        <span style="font-size:.6875rem;color:var(--text-muted);margin-left:auto;">→ ${target?target.bisnis:'Unknown'}</span>
+                    </div>
+                    <p style="font-weight:600;font-size:.8125rem;">${n.title}</p>
+                    <p style="font-size:.75rem;color:var(--text-secondary);">${n.message}</p>
+                </div>`;
+            }).join('') : '<p style="text-align:center;padding:24px;color:var(--text-muted);font-size:.8125rem;">Belum ada notifikasi</p>';
+        }
+
+        // Init
+        renderStats();
+        renderTable();
+        renderNotifHistory();
+    </script>
+</body>
+</html>

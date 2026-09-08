@@ -1,0 +1,11 @@
+node_modules
+graphify-out
+.git
+docs
+ketentuan
+DOKUMENTASI_SOLID.md
+Kelompok5_Laporan_Refactoring_LogistiKita_Revisi_Codex.docx
+*.md
+server.js
+start.js
+server.test.js

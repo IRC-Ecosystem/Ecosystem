@@ -1,0 +1,85 @@
+<%- include("../partials/header", { pageTitle, bodyClass: "bg-[#f8fbff] text-slate-900" }) %>
+  <div class="min-h-screen lg:flex">
+    <%- include("../partials/sidebar", {
+      sidebarTitle: "Manager Panel",
+      sidebarDescription: "Tinjau jejak perubahan operasional dan pembayaran.",
+      sidebarLinks: [
+        { href: "/manager", label: "Dashboard", short: "DB", exact: true },
+        { href: "/manager/payments", label: "Payment", short: "PY", exact: true },
+        { href: "/manager/audit-logs", label: "Audit Log", short: "AL", exact: true },
+        { href: "/manager/smartbank-wallet", label: "Wallet Toko", short: "SW", exact: true },
+        { href: "/manager/api-integrator", label: "API Integrator", short: "API", matchPrefix: "/manager/api-integrator" }
+      ],
+      currentPath,
+      sessionUser
+    }) %>
+
+    <main class="min-w-0 flex-1">
+      <header class="border-b border-blue-100 bg-white/90 px-6 py-5 backdrop-blur">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p class="text-sm font-medium text-slate-500">Jejak aktivitas</p>
+            <h2 class="mt-1 text-3xl font-semibold tracking-tight text-slate-950">Audit Log</h2>
+            <p class="mt-2 text-sm text-slate-500"><%= todayLabel %></p>
+          </div>
+          <a href="/manager" class="inline-flex w-fit items-center rounded-lg border border-blue-100 bg-blue-50/70 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-white">Kembali ke Dashboard</a>
+        </div>
+      </header>
+
+      <section class="px-6 py-6">
+        <% if (typeof dashboardError !== "undefined" && dashboardError) { %>
+          <div class="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"><%= dashboardError %></div>
+        <% } %>
+
+        <section class="rounded-lg bg-white p-6 shadow-soft ring-1 ring-slate-200">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h3 class="text-xl font-semibold text-slate-950">Aktivitas Terbaru</h3>
+              <p class="mt-1 text-sm text-slate-500">100 aktivitas terbaru yang tersimpan.</p>
+            </div>
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"><%= auditLogs.length %> data</span>
+          </div>
+
+          <% if (auditLogs.length === 0) { %>
+            <div class="mt-6 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center">
+              <h4 class="text-lg font-semibold text-slate-950">Belum ada audit log</h4>
+              <p class="mt-2 text-sm text-slate-500">Aktivitas seperti void transaksi akan muncul di sini.</p>
+            </div>
+          <% } else { %>
+            <div class="mt-6 overflow-x-auto">
+              <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead>
+                  <tr class="text-left text-slate-500">
+                    <th class="pb-3 font-medium">Waktu</th>
+                    <th class="pb-3 font-medium">Pelaku</th>
+                    <th class="pb-3 font-medium">Aksi</th>
+                    <th class="pb-3 font-medium">Objek</th>
+                    <th class="pb-3 font-medium">Alasan</th>
+                    <th class="pb-3 font-medium">Detail</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <% auditLogs.forEach((log) => { %>
+                    <tr class="align-top text-slate-700">
+                      <td class="whitespace-nowrap py-4"><%= log.created_at_formatted %></td>
+                      <td class="py-4"><%= log.actor_name %><span class="mt-1 block text-xs uppercase text-slate-400"><%= log.user_role || "sistem" %></span></td>
+                      <td class="py-4"><span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"><%= log.action %></span></td>
+                      <td class="py-4"><%= log.entity_type %> #<%= log.entity_id || "-" %><span class="mt-1 block text-xs text-slate-400"><%= log.ip_address || "IP tidak tersedia" %></span></td>
+                      <td class="max-w-xs py-4"><%= log.reason || "-" %></td>
+                      <td class="py-4">
+                        <details class="min-w-48">
+                          <summary class="cursor-pointer text-xs font-semibold text-blue-700">Lihat perubahan</summary>
+                          <pre class="mt-2 max-w-sm overflow-x-auto rounded-lg bg-slate-950 p-3 text-xs text-slate-100"><%= `Sebelum: ${log.before_summary}\nSesudah: ${log.after_summary}` %></pre>
+                        </details>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          <% } %>
+        </section>
+      </section>
+    </main>
+  </div>
+<%- include("../partials/footer", { flash }) %>

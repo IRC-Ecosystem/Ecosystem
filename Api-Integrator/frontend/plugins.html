@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>API Plugins Management — API Gateway</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .tool-shell { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 28px 20px 48px; }
+    .tool-topbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+    .tool-note { color: var(--text-secondary); font-size: 13.5px; margin-bottom: 16px; line-height: 1.6; }
+    .kbd-pill {
+      display: inline-block; background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-glass); color: var(--text-primary);
+      border-radius: 6px; padding: 1px 8px; font-size: 12px; font-weight: 600;
+    }
+    .plugin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 16px; margin-top: 16px; }
+    .plugin-card {
+      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass);
+      border-radius: 14px; padding: 18px; position: relative; transition: all 0.2s ease;
+    }
+    .plugin-card:hover { border-color: rgba(255, 255, 255, 0.2); transform: translateY(-2px); }
+    .plugin-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .plugin-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+    .plugin-id { font-family: monospace; font-size: 12px; color: var(--accent-cyan); background: rgba(6,182,212,0.1); padding: 2px 8px; rounded: 4px; border-radius: 4px; }
+    .plugin-meta { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px; word-break: break-all; }
+    .plugin-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 12px; }
+    .badge-active { background: rgba(16,185,129,0.15); color: #34d399; }
+    .badge-inactive { background: rgba(244,63,94,0.15); color: #f87171; }
+    .card-actions { display: flex; gap: 8px; margin-top: 14px; pt: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; }
+    @media (max-width:860px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="bg-animation"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+
+  <main class="tool-shell">
+    <a href="/" class="btn btn-outline btn-sm" style="margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Kembali ke Dashboard API Gateway
+    </a>
+
+    <header class="page-header">
+      <h2>
+        <span class="ph-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/><path d="M20 16l-4-4 4-4M4 8l4 4-4 4"/></svg>
+        </span>
+        API Plugins Management
+      </h2>
+      <p>Kelola dynamic API Plugins untuk mendaftarkan endpoint aplikasi eksternal secara dinamis tanpa restart gateway.</p>
+    </header>
+
+    <div class="tool-topbar">
+      <a class="btn btn-outline" href="/" id="nav_back">
+        <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Kembali ke Beranda
+      </a>
+      <a class="btn btn-outline" href="/apps/manage">
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 1-2-2h-4a2 2 0 0 1-2 2v16"/></svg>
+        Apps Management
+      </a>
+      <a class="btn btn-outline" href="/integrator/manage/routing">
+        <svg viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M11 18H8a2 2 0 0 1-2-2V9"/></svg>
+        Routing Test
+      </a>
+    </div>
+
+    <!-- Register / Edit Plugin Form -->
+    <section class="glass-card">
+      <div class="card-header">
+        <div class="card-title" id="form_title">
+          <span class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </span>
+          Tambah API Plugin Baru
+        </div>
+      </div>
+      <p class="tool-note">Isi detail service tujuan. Plugin ini akan otomatis dibaca oleh <strong>Universal Proxy</strong> dan <strong>Backtracking Router</strong>.</p>
+
+      <form id="pluginForm" onsubmit="return false;">
+        <input type="hidden" id="editing_id" value="" />
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="app_id">App ID (Unique Slug)</label>
+            <input class="form-input" id="app_id" placeholder="contoh: warungpos-v2" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="app_name">Nama Aplikasi</label>
+            <input class="form-input" id="app_name" placeholder="contoh: Warung POS V2" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="base_url">Base URL</label>
+            <input class="form-input" id="base_url" placeholder="http://localhost:4003" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="default_endpoint">Default Endpoint</label>
+            <input class="form-input" id="default_endpoint" value="/pos/transaksi" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="method">HTTP Method</label>
+            <select class="form-input" id="method">
+              <option value="POST">POST</option>
+              <option value="GET">GET</option>
+              <option value="PUT">PUT</option>
+              <option value="PATCH">PATCH</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="health_endpoint">Health Endpoint</label>
+            <input class="form-input" id="health_endpoint" value="/health" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="auth_header_name">Auth Header Name (Opsional)</label>
+            <input class="form-input" id="auth_header_name" placeholder="X-API-Key" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="auth_header_value">Auth Header Value (Opsional)</label>
+            <input class="form-input" id="auth_header_value" placeholder="secret-key-xxx" type="password" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="timeout_seconds">Timeout (Detik)</label>
+            <input class="form-input" id="timeout_seconds" type="number" value="10" min="1" max="60" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="description">Deskripsi Plugin</label>
+            <input class="form-input" id="description" placeholder="Keterangan singkat service" />
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button class="btn btn-primary" id="btn_save_plugin">Simpan Plugin</button>
+          <button class="btn btn-outline" id="btn_reset_form" type="button" style="display:none;">Batal Edit</button>
+        </div>
+      </form>
+
+      <div class="response-panel" style="margin-top: 18px;">
+        <div class="response-header">
+          <div class="response-status" id="form_status">
+            <span class="status-pill"></span>
+            Response Status
+          </div>
+        </div>
+        <div class="response-body" id="form_resp">-</div>
+      </div>
+    </section>
+
+    <!-- List Dynamic Plugins -->
+    <section class="glass-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </span>
+          Daftar API Plugins Terdaftar
+        </div>
+        <button class="btn btn-outline btn-sm" id="btn_refresh_plugins" style="margin-left:auto;">Refresh</button>
+      </div>
+
+      <div id="plugin_list_wrap" class="plugin-grid">
+        <p style="color:var(--text-muted); font-size:13px;">Memuat daftar plugin...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/tool_common.js"></script>
+  <script>
+    const SVG_OK   = '<span class="status-pill" style="background:var(--accent-emerald);"></span>';
+    const SVG_ERR  = '<span class="status-pill" style="background:var(--accent-rose);"></span>';
+    const SVG_PEND = '<span class="status-pill" style="background:var(--accent-amber);"></span>';
+
+    configureBackLink('nav_back');
+    const formStatus = document.getElementById('form_status');
+    const formResp   = document.getElementById('form_resp');
+
+    function setPending(text) { formStatus.className = 'response-status pending'; formStatus.innerHTML = SVG_PEND + ' ' + text; }
+    function setSuccess(text) { formStatus.className = 'response-status success'; formStatus.innerHTML = SVG_OK   + ' ' + text; }
+    function setError(text)   { formStatus.className = 'response-status error';   formStatus.innerHTML = SVG_ERR  + ' ' + text; }
+
+    async function loadPlugins() {
+      const wrap = document.getElementById('plugin_list_wrap');
+      try {
+        const res = await fetch('/integrator/plugins');
+        const json = await res.json();
+        const plugins = json.data?.plugins || [];
+
+        if (!plugins.length) {
+          wrap.innerHTML = '<p style="color:var(--text-muted); font-size:13px; grid-column: 1/-1;">Belum ada API Plugin tambahan yang terdaftar. Gunakan form di atas untuk menambah plugin.</p>';
+          return;
+        }
+
+        wrap.innerHTML = plugins.map(p => `
+          <div class="plugin-card">
+            <div class="plugin-header">
+              <div>
+                <div class="plugin-title">${p.app_name}</div>
+                <div class="plugin-id">${p.app_id}</div>
+              </div>
+              <span class="plugin-badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">
+                ${p.is_active ? '● Active' : '○ Inactive'}
+              </span>
+            </div>
+            <div class="plugin-meta"><strong>URL:</strong> ${p.base_url}${p.default_endpoint}</div>
+            <div class="plugin-meta"><strong>Method:</strong> ${p.method} | <strong>Timeout:</strong> ${p.timeout_seconds}s</div>
+            ${p.description ? `<div class="plugin-meta" style="font-style:italic;">${p.description}</div>` : ''}
+            
+            <div class="card-actions">
+              <button class="btn btn-outline btn-sm" onclick="testPlugin(${p.id})">Test Health</button>
+              <button class="btn btn-outline btn-sm" onclick="deletePlugin(${p.id}, '${p.app_name}')" style="color:#f87171; border-color:rgba(244,63,94,0.3);">Hapus</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        wrap.innerHTML = `<p style="color:#f87171; font-size:13px; grid-column: 1/-1;">Gagal memuat plugin: ${e}</p>`;
+      }
+    }
+
+    document.getElementById('btn_save_plugin').addEventListener('click', async () => {
+      const appId = document.getElementById('app_id').value.trim();
+      const appName = document.getElementById('app_name').value.trim();
+      const baseUrl = document.getElementById('base_url').value.trim();
+      const defaultEndpoint = document.getElementById('default_endpoint').value.trim();
+      const method = document.getElementById('method').value;
+      const healthEndpoint = document.getElementById('health_endpoint').value.trim();
+      const authHeaderName = document.getElementById('auth_header_name').value.trim();
+      const authHeaderValue = document.getElementById('auth_header_value').value.trim();
+      const timeoutSeconds = parseInt(document.getElementById('timeout_seconds').value) || 10;
+      const description = document.getElementById('description').value.trim();
+
+      if (!appId || !appName || !baseUrl) {
+        setError('App ID, Nama App, dan Base URL wajib diisi');
+        formResp.textContent = '{"pesan": "App ID, Nama App, dan Base URL wajib diisi"}';
+        return;
+      }
+
+      setPending('Menyimpan plugin...');
+      formResp.textContent = 'Loading...';
+
+      const payload = {
+        app_id: appId,
+        app_name: appName,
+        base_url: baseUrl,
+        default_endpoint: defaultEndpoint,
+        method: method,
+        health_endpoint: healthEndpoint || '/health',
+        auth_header_name: authHeaderName || null,
+        auth_header_value: authHeaderValue || null,
+        timeout_seconds: timeoutSeconds,
+        is_active: true,
+        description: description || null
+      };
+
+      try {
+        const res = await fetch('/integrator/plugins', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        formResp.textContent = JSON.stringify(data, null, 2);
+
+        if (res.ok && data.success) {
+          setSuccess('Plugin berhasil disimpan!');
+          loadPlugins();
+          document.getElementById('pluginForm').reset();
+        } else {
+          setError(data.message || 'Gagal menyimpan plugin');
+        }
+      } catch (e) {
+        setError('Error koneksi server');
+        formResp.textContent = 'Error: ' + e;
+      }
+    });
+
+    async function testPlugin(id) {
+      setPending('Menguji koneksi plugin ID ' + id + '...');
+      formResp.textContent = 'Testing connection...';
+      try {
+        const res = await fetch(`/integrator/plugins/${id}/test`, { method: 'POST' });
+        const data = await res.json();
+        formResp.textContent = JSON.stringify(data, null, 2);
+        if (res.ok && data.success) {
+          setSuccess('Test koneksi selesai!');
+        } else {
+          setError('Test koneksi gagal');
+        }
+      } catch (e) {
+        setError('Error testing connection');
+        formResp.textContent = 'Error: ' + e;
+      }
+    }
+
+    async function deletePlugin(id, name) {
+      if (!confirm(`Apakah Anda yakin ingin menghapus plugin '${name}'?`)) return;
+      setPending('Menghapus plugin...');
+      try {
+        const res = await fetch(`/integrator/plugins/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        formResp.textContent = JSON.stringify(data, null, 2);
+        if (res.ok && data.success) {
+          setSuccess('Plugin berhasil dihapus!');
+          loadPlugins();
+        } else {
+          setError('Gagal menghapus plugin');
+        }
+      } catch (e) {
+        setError('Error deleting plugin');
+        formResp.textContent = 'Error: ' + e;
+      }
+    }
+
+    document.getElementById('btn_refresh_plugins').addEventListener('click', loadPlugins);
+    document.addEventListener('DOMContentLoaded', loadPlugins);
+  </script>
+</body>
+</html>

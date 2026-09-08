@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="light" lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>UMKM Insight - Masuk atau Daftar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#6b3b07",
+                        "secondary-fixed": "#e0e3e2",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed": "#ffdcc2",
+                        "surface-variant": "#dde4e6",
+                        "on-tertiary-fixed": "#2e1500",
+                        "on-tertiary": "#ffffff",
+                        "outline": "#747781",
+                        "primary": "#00255a",
+                        "secondary-container": "#dde0df",
+                        "surface-container": "#e8eff1",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#dde4e6",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e2e9ec",
+                        "on-background": "#161d1f",
+                        "outline-variant": "#c4c6d1",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#d4dbdd",
+                        "inverse-primary": "#aec6ff",
+                        "inverse-surface": "#2b3234",
+                        "primary-fixed-dim": "#aec6ff",
+                        "background": "#f4fafd",
+                        "inverse-on-surface": "#ebf2f4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f4fafd",
+                        "surface": "#f4fafd",
+                        "on-tertiary-container": "#dd9a61",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#434847",
+                        "primary-fixed": "#d8e2ff",
+                        "tertiary-fixed-dim": "#ffb77b",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#161d1f",
+                        "on-secondary-container": "#5f6363",
+                        "on-secondary-fixed": "#181c1c",
+                        "on-primary-container": "#8da8e5",
+                        "surface-tint": "#425d95",
+                        "on-primary-fixed-variant": "#29457c",
+                        "tertiary-container": "#603200",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#1e3c72",
+                        "secondary-fixed-dim": "#c4c7c6",
+                        "surface-container-low": "#eef5f7",
+                        "tertiary": "#402000",
+                        "on-surface-variant": "#44474f",
+                        "secondary": "#5b5f5f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container_max_width": "1280px",
+                        "sm": "12px",
+                        "gutter": "24px",
+                        "base": "8px",
+                        "xs": "4px",
+                        "grid_columns": "12",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "display-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["14px", {"lineHeight": "1", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "fontWeight": "500"}],
+                        "headline-lg": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "display-md": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .form-transition {
+            transition: all 0.3s ease-in-out;
+        }
+        .hidden-form {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .visible-form {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .auth-card {
+            box-shadow: 0px 4px 20px rgba(30, 60, 114, 0.05);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen flex flex-col">
+<!-- Header (Suppressed Nav but Maintained Brand) -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-white border-b border-slate-200">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="insights">insights</span>
+<h1 class="text-xl font-bold tracking-tight text-primary font-headline-md">UMKM Insight</h1>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center px-4 py-24 sm:py-32">
+<!-- Auth Card Container -->
+<div class="w-full max-w-[480px] bg-surface-container-lowest rounded-xl p-lg auth-card border border-outline-variant/30">
+<!-- Tab Switcher -->
+<div class="flex p-xs bg-surface-container rounded-lg mb-lg">
+<button class="flex-1 py-md text-label-lg rounded-md transition-all duration-200 bg-white text-primary shadow-sm" id="tab-login" onclick="switchForm('login')">
+                    Masuk
+                </button>
+<button class="flex-1 py-md text-label-lg rounded-md transition-all duration-200 text-on-surface-variant hover:bg-white/50" id="tab-register" onclick="switchForm('register')">
+                    Daftar
+                </button>
+</div>
+<!-- Login Form -->
+<div class="visible-form form-transition" id="form-login">
+<div class="mb-lg">
+<h2 class="font-headline-lg text-primary mb-xs">Selamat Datang Kembali</h2>
+<p class="text-body-md text-on-surface-variant">Masuk untuk mengelola wawasan bisnis Anda.</p>
+</div>
+<form class="space-y-gutter" id="login-form-el" onsubmit="return handleAuth(event, 'login')">
+<div class="space-y-xs">
+<label class="font-label-sm text-on-surface-variant px-xs">Username</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" data-icon="person">person</span>
+<input class="w-full pl-11 pr-md py-md bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all placeholder:text-outline/50" id="login-username" placeholder="Masukkan username" type="text"/>
+</div>
+<p class="text-error text-[12px] hidden px-xs" id="error-login-username">Username wajib diisi</p>
+</div>
+<div class="space-y-xs">
+<div class="flex justify-between items-center px-xs">
+<label class="font-label-sm text-on-surface-variant">Password</label>
+<a class="text-label-sm text-primary hover:underline" href="#">Lupa Password?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" data-icon="lock">lock</span>
+<input class="w-full pl-11 pr-md py-md bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all placeholder:text-outline/50" id="login-password" placeholder="••••••••" type="password"/>
+</div>
+<p class="text-error text-[12px] hidden px-xs" id="error-login-password">Password wajib diisi</p>
+</div>
+<button class="w-full py-md bg-primary text-on-primary font-label-lg rounded-lg shadow-md hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="submit">
+                        Masuk
+                        <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+</div>
+<!-- Register Form -->
+<div class="hidden-form form-transition" id="form-register">
+<div class="mb-lg">
+<h2 class="font-headline-lg text-primary mb-xs">Mulai Bisnis Anda</h2>
+<p class="text-body-md text-on-surface-variant">Bergabunglah dengan ribuan UMKM sukses lainnya.</p>
+</div>
+<form class="space-y-md" id="register-form-el" onsubmit="return handleAuth(event, 'register')">
+<div class="space-y-xs">
+<label class="font-label-sm text-on-surface-variant px-xs">Nama Lengkap</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" data-icon="badge">badge</span>
+<input class="w-full pl-11 pr-md py-md bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all placeholder:text-outline/50" id="reg-nama" placeholder="Budi Santoso" type="text"/>
+</div>
+<p class="text-error text-[12px] hidden px-xs" id="error-reg-nama">Nama lengkap wajib diisi</p>
+</div>
+<div class="space-y-xs">
+<label class="font-label-sm text-on-surface-variant px-xs">Email Bisnis</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" data-icon="mail">mail</span>
+<input class="w-full pl-11 pr-md py-md bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all placeholder:text-outline/50" id="reg-email" placeholder="nama@bisnis.com" type="email"/>
+</div>
+<p class="text-error text-[12px] hidden px-xs" id="error-reg-email">Email tidak valid</p>
+</div>
+<div class="space-y-xs">
+<label class="font-label-sm text-on-surface-variant px-xs">Nama Bisnis</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" data-icon="storefront">storefront</span>
+<input class="w-full pl-11 pr-md py-md bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all placeholder:text-outline/50" id="reg-bisnis" placeholder="Toko Berkah Utama" type="text"/>
+</div>
+<p class="text-error text-[12px] hidden px-xs" id="error-reg-bisnis">Nama bisnis wajib diisi</p>
+</div>
+<div class="space-y-xs">
+<label class="font-label-sm text-on-surface-variant px-xs">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline" data-icon="lock">lock</span>
+<input class="w-full pl-11 pr-md py-md bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary outline-none transition-all placeholder:text-outline/50" id="reg-password" placeholder="Min. 8 karakter" type="password"/>
+</div>
+<p class="text-error text-[12px] hidden px-xs" id="error-reg-password">Password minimal 8 karakter</p>
+</div>
+<button class="w-full mt-gutter py-md bg-primary text-on-primary font-label-lg rounded-lg shadow-md hover:bg-primary-container active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="submit">
+                        Daftar
+                        <span class="material-symbols-outlined text-sm" data-icon="app_registration">app_registration</span>
+</button>
+</form>
+</div>
+<!-- Footer Text -->
+<div class="mt-xl text-center">
+<p class="text-body-md text-on-surface-variant">
+                    Butuh bantuan? <a class="text-primary font-semibold hover:underline" href="#">Hubungi Support</a>
+</p>
+</div>
+</div>
+</main>
+<!-- Visual Background Element -->
+<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+<div class="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-primary-container/5 blur-[120px]"></div>
+<div class="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-surface-tint/5 blur-[120px]"></div>
+</div>
+<script>
+        function switchForm(type) {
+            const loginForm = document.getElementById('form-login');
+            const registerForm = document.getElementById('form-register');
+            const loginTab = document.getElementById('tab-login');
+            const registerTab = document.getElementById('tab-register');
+
+            if (type === 'login') {
+                registerForm.classList.replace('visible-form', 'hidden-form');
+                setTimeout(() => {
+                    loginForm.classList.replace('hidden-form', 'visible-form');
+                }, 100);
+                
+                loginTab.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                loginTab.classList.remove('text-on-surface-variant', 'hover:bg-white/50');
+                
+                registerTab.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                registerTab.classList.add('text-on-surface-variant', 'hover:bg-white/50');
+            } else {
+                loginForm.classList.replace('visible-form', 'hidden-form');
+                setTimeout(() => {
+                    registerForm.classList.replace('hidden-form', 'visible-form');
+                }, 100);
+
+                registerTab.classList.add('bg-white', 'text-primary', 'shadow-sm');
+                registerTab.classList.remove('text-on-surface-variant', 'hover:bg-white/50');
+                
+                loginTab.classList.remove('bg-white', 'text-primary', 'shadow-sm');
+                loginTab.classList.add('text-on-surface-variant', 'hover:bg-white/50');
+            }
+        }
+
+        function handleAuth(event, type) {
+            event.preventDefault();
+            let isValid = true;
+
+            // Reset errors
+            document.querySelectorAll('.text-error').forEach(el => el.classList.add('hidden'));
+
+            if (type === 'login') {
+                const user = document.getElementById('login-username').value;
+                const pass = document.getElementById('login-password').value;
+
+                if (!user) {
+                    document.getElementById('error-login-username').classList.remove('hidden');
+                    isValid = false;
+                }
+                if (!pass) {
+                    document.getElementById('error-login-password').classList.remove('hidden');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    alert('Melakukan autentikasi masuk...');
+                }
+            } else {
+                const nama = document.getElementById('reg-nama').value;
+                const email = document.getElementById('reg-email').value;
+                const bisnis = document.getElementById('reg-bisnis').value;
+                const pass = document.getElementById('reg-password').value;
+
+                if (!nama) {
+                    document.getElementById('error-reg-nama').classList.remove('hidden');
+                    isValid = false;
+                }
+                if (!email || !email.includes('@')) {
+                    document.getElementById('error-reg-email').classList.remove('hidden');
+                    isValid = false;
+                }
+                if (!bisnis) {
+                    document.getElementById('error-reg-bisnis').classList.remove('hidden');
+                    isValid = false;
+                }
+                if (pass.length < 8) {
+                    document.getElementById('error-reg-password').classList.remove('hidden');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    alert('Memproses pendaftaran akun...');
+                }
+            }
+            return false;
+        }
+    </script>
+</body></html>

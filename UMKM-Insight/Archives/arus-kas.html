@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Insight — Arus Kas</title>
+    <link rel="stylesheet" href="shared.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}}}}}</script>
+    <style>
+        body{display:flex;height:100vh;overflow:hidden;}
+        .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .main-content{flex:1;overflow-y:auto;padding:24px;background:var(--surface);}
+        .chart-card{padding:24px;}
+        .chart-card h3{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        .filter-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;padding:20px;margin-bottom:24px;}
+        .filter-bar .form-group{min-width:140px;flex:1;}
+        .source-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:600;background:#ecfdf5;color:#059669;border:1px solid #bbf7d0;}
+        .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+        .cat-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-lg);background:var(--surface-alt);border:1px solid var(--border-light);}
+        .cat-bar{height:6px;border-radius:999px;background:var(--border);flex:1;position:relative;overflow:hidden;}
+        .cat-bar-fill{height:100%;border-radius:999px;position:absolute;left:0;top:0;}
+        @media(max-width:1024px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+    <div class="main-wrap">
+        <div id="topbar-container"></div>
+        <div class="main-content">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px;" class="animate-fade-in">
+                <div>
+                    <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);">Arus Kas (Cashflow)</h1>
+                    <p style="font-size:.8125rem;color:var(--text-secondary);margin-top:4px;display:flex;align-items:center;gap:8px;">Aliran kas masuk & keluar bisnis Anda <span class="source-badge"><i class="ph-fill ph-bank"></i> SmartBank</span></p>
+                </div>
+                <button onclick="location.reload()" class="btn btn-outline btn-sm"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+            </div>
+
+            <div class="card filter-bar animate-fade-in delay-100">
+                <div class="form-group"><label class="form-label">Mulai</label><input type="date" class="form-input" id="f-start"></div>
+                <div class="form-group"><label class="form-label">Sampai</label><input type="date" class="form-input" id="f-end"></div>
+                <div class="form-group"><label class="form-label">Arah Arus</label>
+                    <select class="form-select" id="f-dir"><option value="all">Semua</option><option value="in">Kas Masuk</option><option value="out">Kas Keluar</option></select>
+                </div>
+                <div><button class="btn btn-primary btn-sm" onclick="showToast('Filter diterapkan','success')"><i class="ph ph-funnel"></i> Filter</button></div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid-3 animate-fade-in delay-200" id="kpi-area"></div>
+
+            <!-- FREE: Daily Cashflow Chart -->
+            <div class="card chart-card animate-fade-in delay-300" style="margin-bottom:16px;">
+                <h3><i class="ph ph-chart-line" style="color:var(--brand-600);"></i> Tren Arus Kas Harian (7 Hari)</h3>
+                <div style="height:300px;"><canvas id="chart-daily"></canvas></div>
+            </div>
+
+            <!-- PREMIUM: Monthly + Forecast + Category -->
+            <div id="premium-section" style="position:relative;">
+                <div class="grid-2 animate-fade-in delay-400">
+                    <div class="card chart-card">
+                        <h3><i class="ph ph-chart-bar" style="color:#6366f1;"></i> Perbandingan Bulanan <span class="badge badge-premium" style="font-size:.625rem;">PRO</span></h3>
+                        <div style="height:280px;"><canvas id="chart-monthly"></canvas></div>
+                    </div>
+                    <div class="card chart-card">
+                        <h3><i class="ph ph-crystal-ball" style="color:#8b5cf6;"></i> Proyeksi Kas <span class="badge badge-premium" style="font-size:.625rem;">PRO</span></h3>
+                        <div style="height:280px;"><canvas id="chart-forecast"></canvas></div>
+                    </div>
+                </div>
+                <div class="card animate-fade-in delay-500" style="padding:24px;margin-bottom:16px;">
+                    <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><i class="ph ph-stack" style="color:var(--warning);"></i> Breakdown Kategori <span class="badge badge-premium" style="font-size:.625rem;">PRO</span></h3>
+                    <div id="category-breakdown" style="display:flex;flex-direction:column;gap:10px;"></div>
+                </div>
+                <div class="card animate-fade-in delay-600" style="padding:20px;margin-bottom:24px;display:flex;justify-content:flex-end;gap:8px;" id="export-row"></div>
+            </div>
+
+            <footer style="text-align:center;font-size:.75rem;color:var(--text-muted);padding:16px;border-top:1px solid var(--border);">&copy; 2026 Ekosistem Ekonomi UMKM</footer>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const user = initPage('arus-kas', 'client');
+        if (!user) throw new Error('Auth');
+        document.getElementById('sidebar-container').innerHTML = buildSidebar('arus-kas');
+        document.getElementById('topbar-container').innerHTML = buildTopbar(user);
+
+        const premium = isPremium(user);
+        const data = generateCashflowData();
+        const today = new Date(); const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate()-7);
+        document.getElementById('f-start').valueAsDate = weekAgo;
+        document.getElementById('f-end').valueAsDate = today;
+
+        // KPIs
+        const netPositive = data.kpi.netCash >= 0;
+        document.getElementById('kpi-area').innerHTML = [
+            {l:'Arus Kas Bersih',v:formatRupiah(data.kpi.netCash),icon:'ph-scales',bg:netPositive?'#ecfdf5':'#fef2f2',c:netPositive?'#059669':'#dc2626',t:netPositive?'+8.3%':'-4.1%',up:netPositive},
+            {l:'Total Kas Masuk',v:formatRupiah(data.kpi.totalIn),icon:'ph-arrow-circle-down',bg:'#ecfdf5',c:'#059669',t:'+12.5%',up:true},
+            {l:'Total Kas Keluar',v:formatRupiah(data.kpi.totalOut),icon:'ph-arrow-circle-up',bg:'#fef2f2',c:'#dc2626',t:'-2.1%',up:false}
+        ].map(k=>`<div class="card kpi-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="kpi-label">${k.l}</span><div class="kpi-icon" style="background:${k.bg};color:${k.c};"><i class="ph ${k.icon}"></i></div></div><div class="kpi-value">${k.v}</div><div class="kpi-trend ${k.up?'up':'down'}"><i class="ph ${k.up?'ph-trend-up':'ph-trend-down'}"></i> ${k.t}</div></div>`).join('');
+
+        // Charts
+        Chart.defaults.font.family = "'Inter'";
+        Chart.defaults.color = '#94a3b8';
+
+        // Daily (Free)
+        new Chart(document.getElementById('chart-daily'),{type:'line',data:{labels:data.daily.labels,datasets:[{label:'Kas Masuk',data:data.daily.masuk,borderColor:'#14b8a6',backgroundColor:'rgba(20,184,166,0.1)',borderWidth:2,fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#14b8a6'},{label:'Kas Keluar',data:data.daily.keluar,borderColor:'#f43f5e',backgroundColor:'transparent',borderWidth:2,borderDash:[5,5],tension:.4,pointRadius:4,pointBackgroundColor:'#f43f5e'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+formatRupiah(ctx.raw)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+(v/1e6)+'M'},grid:{borderDash:[2,4],color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+
+        // Premium
+        if (!premium) {
+            renderPremiumLock('premium-section', 'Analisis Arus Kas Lanjutan');
+        } else {
+            // Monthly comparison
+            new Chart(document.getElementById('chart-monthly'),{type:'bar',data:{labels:data.monthly.labels,datasets:[{label:'Kas Masuk',data:data.monthly.masuk,backgroundColor:'rgba(20,184,166,0.6)',borderRadius:4},{label:'Kas Keluar',data:data.monthly.keluar,backgroundColor:'rgba(244,63,94,0.4)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+formatRupiah(ctx.raw)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+(v/1e6)+'M'},grid:{borderDash:[2,4]}},x:{grid:{display:false}}}}});
+
+            // Forecast
+            new Chart(document.getElementById('chart-forecast'),{type:'line',data:{labels:data.forecast.labels,datasets:[{label:'Proyeksi Kas',data:data.forecast.projected,borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,0.1)',borderWidth:2,borderDash:[6,4],fill:true,tension:.3,pointRadius:5,pointBackgroundColor:'#8b5cf6'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'Proyeksi: '+formatRupiah(ctx.raw)}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'Rp '+(v/1e6)+'M'},grid:{borderDash:[2,4]}},x:{grid:{display:false}}}}});
+
+            // Category breakdown
+            const cats = data.categories;
+            const maxVal = Math.max(...cats.masuk, ...cats.keluar);
+            const catColors = ['#14b8a6','#f43f5e','#fb923c','#6366f1','#f59e0b'];
+            document.getElementById('category-breakdown').innerHTML = cats.labels.map((label,i)=>{
+                const inVal = cats.masuk[i]; const outVal = cats.keluar[i]; const val = inVal || outVal;
+                const pct = Math.round((val/maxVal)*100);
+                return `<div class="cat-item"><div style="min-width:130px;"><p style="font-size:.8125rem;font-weight:600;">${label}</p><p style="font-size:.6875rem;color:var(--text-muted);">${inVal?'Masuk':'Keluar'}: ${formatRupiah(val)}</p></div><div class="cat-bar"><div class="cat-bar-fill" style="width:${pct}%;background:${catColors[i]};"></div></div><span style="font-size:.75rem;font-weight:600;color:var(--text-secondary);min-width:40px;text-align:right;">${pct}%</span></div>`;
+            }).join('');
+
+            document.getElementById('export-row').innerHTML = '<button class="btn btn-outline btn-sm" onclick="showToast(\'Data CSV berhasil di-download\',\'success\')"><i class="ph ph-download-simple"></i> Export CSV</button>';
+        }
+    </script>
+</body>
+</html>

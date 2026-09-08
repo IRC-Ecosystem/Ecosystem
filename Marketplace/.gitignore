@@ -1,0 +1,40 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# IDE/editor metadata
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# PHP dependencies and generated files
+vendor/
+
+# Runtime logs, cache, and temporary files
+*.log
+logs/
+cache/
+tmp/
+temp/
+
+# Local/generated uploads or exported files
+public/uploads/
+uploads/
+storage/
+
+# Codex/local agent metadata
+.agents/
+.codex/
+
+# Database dumps generated locally
+*.sql.gz
+*.sql.zip
+*.dump
+*.bak

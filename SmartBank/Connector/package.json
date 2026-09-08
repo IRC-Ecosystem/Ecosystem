@@ -1,0 +1,42 @@
+{
+  "name": "smartbank-connector",
+  "version": "1.0.0",
+  "description": "Connector service for SmartBank",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev src/server.ts",
+    "test": "npm run build && jest --runInBand",
+    "test:e2e": "node scripts/e2e-happy-path.js",
+    "test:load": "k6 run load/k6-100rps.js",
+    "db:setup": "node scripts/setup-local-db.js",
+    "prisma:generate": "node scripts/run-prisma.js generate",
+    "prisma:validate": "node scripts/run-prisma.js validate",
+    "prisma:push": "node scripts/run-prisma.js db push",
+    "seed:service-key": "node scripts/seed-service-key.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "libphonenumber-js": "^1.11.17",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.17.10",
+    "jest": "^29.7.0",
+    "prisma": "^5.22.0",
+    "ts-jest": "^29.2.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.2"
+  }
+}

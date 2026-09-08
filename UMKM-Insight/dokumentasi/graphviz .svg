@@ -1,0 +1,312 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="2012pt" height="430pt" viewBox="0.00 0.00 2012.00 430.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 425.6)">
+<title>UMKM_Insight_Workflow</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-425.6 2007.94,-425.6 2007.94,4 -4,4"/>
+<g id="clust1" class="cluster">
+<title>cluster_auth</title>
+<path fill="none" stroke="#2196f3" stroke-dasharray="5,2" d="M783.94,-8C783.94,-8 957.94,-8 957.94,-8 963.94,-8 969.94,-14 969.94,-20 969.94,-20 969.94,-176.4 969.94,-176.4 969.94,-182.4 963.94,-188.4 957.94,-188.4 957.94,-188.4 783.94,-188.4 783.94,-188.4 777.94,-188.4 771.94,-182.4 771.94,-176.4 771.94,-176.4 771.94,-20 771.94,-20 771.94,-14 777.94,-8 783.94,-8"/>
+<text xml:space="preserve" text-anchor="middle" x="870.94" y="-173.6" font-family="Helvetica,Arial,sans-serif" font-size="12.00" fill="#2196f3">Autentikasi</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_client</title>
+<path fill="#fdf6fe" stroke="#9c27b0" d="M1165.94,-8C1165.94,-8 1983.94,-8 1983.94,-8 1989.94,-8 1995.94,-14 1995.94,-20 1995.94,-20 1995.94,-291.8 1995.94,-291.8 1995.94,-297.8 1989.94,-303.8 1983.94,-303.8 1983.94,-303.8 1165.94,-303.8 1165.94,-303.8 1159.94,-303.8 1153.94,-297.8 1153.94,-291.8 1153.94,-291.8 1153.94,-20 1153.94,-20 1153.94,-14 1159.94,-8 1165.94,-8"/>
+<text xml:space="preserve" text-anchor="middle" x="1574.94" y="-289" font-family="Helvetica,Arial,sans-serif" font-size="12.00" fill="#9c27b0">Area Client (UMKM)</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_operator</title>
+<path fill="#fffbf5" stroke="#ff9800" d="M957.94,-229.4C957.94,-229.4 1055.94,-229.4 1055.94,-229.4 1061.94,-229.4 1067.94,-235.4 1067.94,-241.4 1067.94,-241.4 1067.94,-291.8 1067.94,-291.8 1067.94,-297.8 1061.94,-303.8 1055.94,-303.8 1055.94,-303.8 957.94,-303.8 957.94,-303.8 951.94,-303.8 945.94,-297.8 945.94,-291.8 945.94,-291.8 945.94,-241.4 945.94,-241.4 945.94,-235.4 951.94,-229.4 957.94,-229.4"/>
+<text xml:space="preserve" text-anchor="middle" x="1006.94" y="-289" font-family="Helvetica,Arial,sans-serif" font-size="12.00" fill="#ff9800">Area Operator</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_admin</title>
+<path fill="#fef6f6" stroke="#f44336" d="M208.94,-114C208.94,-114 740.94,-114 740.94,-114 746.94,-114 752.94,-120 752.94,-126 752.94,-126 752.94,-291.8 752.94,-291.8 752.94,-297.8 746.94,-303.8 740.94,-303.8 740.94,-303.8 208.94,-303.8 208.94,-303.8 202.94,-303.8 196.94,-297.8 196.94,-291.8 196.94,-291.8 196.94,-126 196.94,-126 196.94,-120 202.94,-114 208.94,-114"/>
+<text xml:space="preserve" text-anchor="middle" x="474.94" y="-289" font-family="Helvetica,Arial,sans-serif" font-size="12.00" fill="#f44336">Area Admin</text>
+</g>
+<!-- Start -->
+<g id="node1" class="node">
+<title>Start</title>
+<ellipse fill="#4caf50" stroke="#cccccc" cx="75.94" cy="-255.4" rx="27" ry="18"/>
+<text xml:space="preserve" text-anchor="middle" x="75.94" y="-252.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00" fill="white">Start</text>
+</g>
+<!-- Register -->
+<g id="node2" class="node">
+<title>Register</title>
+<path fill="#ffffff" stroke="#cccccc" d="M843.72,-158C843.72,-158 792.16,-158 792.16,-158 786.16,-158 780.16,-152 780.16,-146 780.16,-146 780.16,-134 780.16,-134 780.16,-128 786.16,-122 792.16,-122 792.16,-122 843.72,-122 843.72,-122 849.72,-122 855.72,-128 855.72,-134 855.72,-134 855.72,-146 855.72,-146 855.72,-152 849.72,-158 843.72,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="817.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Register</text>
+<text xml:space="preserve" text-anchor="middle" x="817.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(register.php)</text>
+</g>
+<!-- Start&#45;&gt;Register -->
+<g id="edge2" class="edge">
+<title>Start-&gt;Register</title>
+<path fill="none" stroke="#666666" d="M101.35,-248.73C134.4,-241.35 187.94,-229.4 187.94,-229.4 187.94,-229.4 761.94,-188.4 761.94,-188.4 761.94,-188.4 775.3,-177.09 788.97,-165.52"/>
+<polygon fill="#666666" stroke="#666666" points="790.88,-168.49 796.25,-159.36 786.35,-163.15 790.88,-168.49"/>
+<text xml:space="preserve" text-anchor="middle" x="679.62" y="-199.4" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Belum Punya Akun?</text>
+</g>
+<!-- Login -->
+<g id="node3" class="node">
+<title>Login</title>
+<path fill="#ffffff" stroke="#cccccc" d="M835.53,-52C835.53,-52 794.34,-52 794.34,-52 788.34,-52 782.34,-46 782.34,-40 782.34,-40 782.34,-28 782.34,-28 782.34,-22 788.34,-16 794.34,-16 794.34,-16 835.53,-16 835.53,-16 841.53,-16 847.53,-22 847.53,-28 847.53,-28 847.53,-40 847.53,-40 847.53,-46 841.53,-52 835.53,-52"/>
+<text xml:space="preserve" text-anchor="middle" x="814.94" y="-37.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Login</text>
+<text xml:space="preserve" text-anchor="middle" x="814.94" y="-24.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(login.php)</text>
+</g>
+<!-- Start&#45;&gt;Login -->
+<g id="edge1" class="edge">
+<title>Start-&gt;Login</title>
+<path fill="none" stroke="#666666" d="M79.66,-237.18C87.76,-199.69 106.28,-114 106.28,-114 106.28,-114 615.91,-57.19 770.81,-39.92"/>
+<polygon fill="#666666" stroke="#666666" points="771.12,-43.41 780.68,-38.82 770.35,-36.45 771.12,-43.41"/>
+<text xml:space="preserve" text-anchor="middle" x="147.11" y="-137" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Sudah Punya Akun?</text>
+</g>
+<!-- Register&#45;&gt;Login -->
+<g id="edge3" class="edge">
+<title>Register-&gt;Login</title>
+<path fill="none" stroke="#666666" d="M817.44,-121.83C816.99,-106.02 816.3,-82.27 815.76,-63.6"/>
+<polygon fill="#666666" stroke="#666666" points="819.27,-63.61 815.48,-53.71 812.27,-63.81 819.27,-63.61"/>
+<text xml:space="preserve" text-anchor="middle" x="847.21" y="-84" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Berhasil Daftar</text>
+</g>
+<!-- RoleCheck -->
+<g id="node5" class="node">
+<title>RoleCheck</title>
+<polygon fill="#ffc107" stroke="#cccccc" points="714.94,-421.6 646.41,-387.2 714.94,-352.8 783.47,-387.2 714.94,-421.6"/>
+<text xml:space="preserve" text-anchor="middle" x="714.94" y="-390.5" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Pengecekan</text>
+<text xml:space="preserve" text-anchor="middle" x="714.94" y="-377.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Role</text>
+</g>
+<!-- Login&#45;&gt;RoleCheck -->
+<g id="edge4" class="edge">
+<title>Login-&gt;RoleCheck</title>
+<path fill="none" stroke="#666666" d="M782.22,-37.88C667.73,-47.95 291.94,-81 291.94,-81 291.94,-81 81.94,-114 81.94,-114 81.94,-114 0,-196.4 0,-196.4 0,-196.4 0,-208.4 0,-208.4 0,-208.4 30.94,-303.8 30.94,-303.8 30.94,-303.8 477.6,-357.61 649.04,-378.26"/>
+<polygon fill="#666666" stroke="#666666" points="648.56,-381.73 658.9,-379.45 649.4,-374.78 648.56,-381.73"/>
+<text xml:space="preserve" text-anchor="middle" x="38.47" y="-199.4" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Submit Credentials</text>
+</g>
+<!-- Logout -->
+<g id="node4" class="node">
+<title>Logout</title>
+<path fill="#ffffff" stroke="#cccccc" d="M950.28,-158C950.28,-158 903.59,-158 903.59,-158 897.59,-158 891.59,-152 891.59,-146 891.59,-146 891.59,-134 891.59,-134 891.59,-128 897.59,-122 903.59,-122 903.59,-122 950.28,-122 950.28,-122 956.28,-122 962.28,-128 962.28,-134 962.28,-134 962.28,-146 962.28,-146 962.28,-152 956.28,-158 950.28,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="926.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Logout</text>
+<text xml:space="preserve" text-anchor="middle" x="926.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(logout.php)</text>
+</g>
+<!-- Logout&#45;&gt;Login -->
+<g id="edge24" class="edge">
+<title>Logout-&gt;Login</title>
+<path fill="none" stroke="#666666" d="M914.94,-121.6C903.15,-104.51 886.94,-81 886.94,-81 886.94,-81 869.25,-69.7 851.41,-58.3"/>
+<polygon fill="#666666" stroke="#666666" points="853.75,-55.64 843.43,-53.21 849.98,-61.54 853.75,-55.64"/>
+</g>
+<!-- DashboardClient -->
+<g id="node6" class="node">
+<title>DashboardClient</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1502.95,-273.4C1502.95,-273.4 1386.92,-273.4 1386.92,-273.4 1380.92,-273.4 1374.92,-267.4 1374.92,-261.4 1374.92,-261.4 1374.92,-249.4 1374.92,-249.4 1374.92,-243.4 1380.92,-237.4 1386.92,-237.4 1386.92,-237.4 1502.95,-237.4 1502.95,-237.4 1508.95,-237.4 1514.95,-243.4 1514.95,-249.4 1514.95,-249.4 1514.95,-261.4 1514.95,-261.4 1514.95,-267.4 1508.95,-273.4 1502.95,-273.4"/>
+<text xml:space="preserve" text-anchor="middle" x="1444.94" y="-258.7" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Dashboard Analytics</text>
+<text xml:space="preserve" text-anchor="middle" x="1444.94" y="-245.5" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(index.php / dashboard.php)</text>
+</g>
+<!-- RoleCheck&#45;&gt;DashboardClient -->
+<g id="edge5" class="edge">
+<title>RoleCheck-&gt;DashboardClient</title>
+<path fill="none" stroke="#9c27b0" d="M764.83,-377.33C888.73,-355.3 1211.39,-297.93 1363.43,-270.89"/>
+<polygon fill="#9c27b0" stroke="#9c27b0" points="1363.8,-274.38 1373.03,-269.19 1362.57,-267.49 1363.8,-274.38"/>
+<text xml:space="preserve" text-anchor="middle" x="1147.95" y="-314.8" font-family="Helvetica,Arial,sans-serif" font-size="10.00" fill="#9c27b0">Role: Client</text>
+</g>
+<!-- DashboardOperator -->
+<g id="node14" class="node">
+<title>DashboardOperator</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1047.69,-273.4C1047.69,-273.4 966.19,-273.4 966.19,-273.4 960.19,-273.4 954.19,-267.4 954.19,-261.4 954.19,-261.4 954.19,-249.4 954.19,-249.4 954.19,-243.4 960.19,-237.4 966.19,-237.4 966.19,-237.4 1047.69,-237.4 1047.69,-237.4 1053.69,-237.4 1059.69,-243.4 1059.69,-249.4 1059.69,-249.4 1059.69,-261.4 1059.69,-261.4 1059.69,-267.4 1053.69,-273.4 1047.69,-273.4"/>
+<text xml:space="preserve" text-anchor="middle" x="1006.94" y="-258.7" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Operator Dashboard</text>
+<text xml:space="preserve" text-anchor="middle" x="1006.94" y="-245.5" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(operator.php)</text>
+</g>
+<!-- RoleCheck&#45;&gt;DashboardOperator -->
+<g id="edge6" class="edge">
+<title>RoleCheck-&gt;DashboardOperator</title>
+<path fill="none" stroke="#ff9800" d="M750.74,-370.28C802.5,-347.28 898.42,-304.64 957.08,-278.56"/>
+<polygon fill="#ff9800" stroke="#ff9800" points="958.48,-281.77 966.19,-274.51 955.63,-275.38 958.48,-281.77"/>
+<text xml:space="preserve" text-anchor="middle" x="908.27" y="-314.8" font-family="Helvetica,Arial,sans-serif" font-size="10.00" fill="#ff9800">Role: Operator</text>
+</g>
+<!-- DashboardAdmin -->
+<g id="node15" class="node">
+<title>DashboardAdmin</title>
+<path fill="#ffffff" stroke="#cccccc" d="M641.42,-273.4C641.42,-273.4 568.46,-273.4 568.46,-273.4 562.46,-273.4 556.46,-267.4 556.46,-261.4 556.46,-261.4 556.46,-249.4 556.46,-249.4 556.46,-243.4 562.46,-237.4 568.46,-237.4 568.46,-237.4 641.42,-237.4 641.42,-237.4 647.42,-237.4 653.42,-243.4 653.42,-249.4 653.42,-249.4 653.42,-261.4 653.42,-261.4 653.42,-267.4 647.42,-273.4 641.42,-273.4"/>
+<text xml:space="preserve" text-anchor="middle" x="604.94" y="-258.7" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Admin Dashboard</text>
+<text xml:space="preserve" text-anchor="middle" x="604.94" y="-245.5" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(admin.php)</text>
+</g>
+<!-- RoleCheck&#45;&gt;DashboardAdmin -->
+<g id="edge7" class="edge">
+<title>RoleCheck-&gt;DashboardAdmin</title>
+<path fill="none" stroke="#f44336" d="M694.76,-362.39C675.6,-339.78 646.85,-305.86 627.07,-282.51"/>
+<polygon fill="#f44336" stroke="#f44336" points="629.82,-280.35 620.68,-274.98 624.48,-284.87 629.82,-280.35"/>
+<text xml:space="preserve" text-anchor="middle" x="685.91" y="-314.8" font-family="Helvetica,Arial,sans-serif" font-size="10.00" fill="#f44336">Role: Admin</text>
+</g>
+<!-- DashboardClient&#45;&gt;Logout -->
+<g id="edge21" class="edge">
+<title>DashboardClient-&gt;Logout</title>
+<path fill="none" stroke="#666666" d="M1374.45,-237.08C1304.91,-219.99 1208.94,-196.4 1208.94,-196.4 1208.94,-196.4 988.94,-188.4 988.94,-188.4 988.94,-188.4 973.87,-176.88 958.58,-165.19"/>
+<polygon fill="#666666" stroke="#666666" points="960.95,-162.59 950.88,-159.3 956.69,-168.15 960.95,-162.59"/>
+</g>
+<!-- LaporanPenjualan -->
+<g id="node7" class="node">
+<title>LaporanPenjualan</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1417.93,-158C1417.93,-158 1319.95,-158 1319.95,-158 1313.95,-158 1307.95,-152 1307.95,-146 1307.95,-146 1307.95,-134 1307.95,-134 1307.95,-128 1313.95,-122 1319.95,-122 1319.95,-122 1417.93,-122 1417.93,-122 1423.93,-122 1429.93,-128 1429.93,-134 1429.93,-134 1429.93,-146 1429.93,-146 1429.93,-152 1423.93,-158 1417.93,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="1368.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Laporan Penjualan</text>
+<text xml:space="preserve" text-anchor="middle" x="1368.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(laporan-penjualan.php)</text>
+</g>
+<!-- DashboardClient&#45;&gt;LaporanPenjualan -->
+<g id="edge8" class="edge">
+<title>DashboardClient-&gt;LaporanPenjualan</title>
+<path fill="none" stroke="#666666" d="M1433.4,-237.18C1421.06,-218.78 1401.35,-189.37 1386.97,-167.91"/>
+<polygon fill="#666666" stroke="#666666" points="1389.91,-166 1381.43,-159.64 1384.09,-169.9 1389.91,-166"/>
+</g>
+<!-- ArusKas -->
+<g id="node8" class="node">
+<title>ArusKas</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1565.9,-158C1565.9,-158 1477.98,-158 1477.98,-158 1471.98,-158 1465.98,-152 1465.98,-146 1465.98,-146 1465.98,-134 1465.98,-134 1465.98,-128 1471.98,-122 1477.98,-122 1477.98,-122 1565.9,-122 1565.9,-122 1571.9,-122 1577.9,-128 1577.9,-134 1577.9,-134 1577.9,-146 1577.9,-146 1577.9,-152 1571.9,-158 1565.9,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="1521.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Manajemen Arus Kas</text>
+<text xml:space="preserve" text-anchor="middle" x="1521.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(arus-kas.php)</text>
+</g>
+<!-- DashboardClient&#45;&gt;ArusKas -->
+<g id="edge9" class="edge">
+<title>DashboardClient-&gt;ArusKas</title>
+<path fill="none" stroke="#666666" d="M1456.63,-237.18C1469.13,-218.78 1489.1,-189.37 1503.67,-167.91"/>
+<polygon fill="#666666" stroke="#666666" points="1506.56,-169.88 1509.28,-159.64 1500.77,-165.94 1506.56,-169.88"/>
+</g>
+<!-- PerformaProduk -->
+<g id="node9" class="node">
+<title>PerformaProduk</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1719.79,-158C1719.79,-158 1626.08,-158 1626.08,-158 1620.08,-158 1614.08,-152 1614.08,-146 1614.08,-146 1614.08,-134 1614.08,-134 1614.08,-128 1620.08,-122 1626.08,-122 1626.08,-122 1719.79,-122 1719.79,-122 1725.79,-122 1731.79,-128 1731.79,-134 1731.79,-134 1731.79,-146 1731.79,-146 1731.79,-152 1725.79,-158 1719.79,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="1672.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Performa Produk</text>
+<text xml:space="preserve" text-anchor="middle" x="1672.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(performa-produk.php)</text>
+</g>
+<!-- DashboardClient&#45;&gt;PerformaProduk -->
+<g id="edge10" class="edge">
+<title>DashboardClient-&gt;PerformaProduk</title>
+<path fill="none" stroke="#666666" d="M1484.61,-237.06C1529.35,-217.5 1595.94,-188.4 1595.94,-188.4 1595.94,-188.4 1615.54,-176.33 1634.97,-164.37"/>
+<polygon fill="#666666" stroke="#666666" points="1636.73,-167.4 1643.41,-159.17 1633.06,-161.44 1636.73,-167.4"/>
+</g>
+<!-- Langganan -->
+<g id="node10" class="node">
+<title>Langganan</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1847.81,-158C1847.81,-158 1780.07,-158 1780.07,-158 1774.07,-158 1768.07,-152 1768.07,-146 1768.07,-146 1768.07,-134 1768.07,-134 1768.07,-128 1774.07,-122 1780.07,-122 1780.07,-122 1847.81,-122 1847.81,-122 1853.81,-122 1859.81,-128 1859.81,-134 1859.81,-134 1859.81,-146 1859.81,-146 1859.81,-152 1853.81,-158 1847.81,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="1813.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Langganan / Tier</text>
+<text xml:space="preserve" text-anchor="middle" x="1813.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(langganan.php)</text>
+</g>
+<!-- DashboardClient&#45;&gt;Langganan -->
+<g id="edge11" class="edge">
+<title>DashboardClient-&gt;Langganan</title>
+<path fill="none" stroke="#666666" d="M1515.29,-239.18C1605.37,-219.68 1749.94,-188.4 1749.94,-188.4 1749.94,-188.4 1765.5,-176.88 1781.27,-165.19"/>
+<polygon fill="#666666" stroke="#666666" points="1783.3,-168.05 1789.25,-159.28 1779.14,-162.42 1783.3,-168.05"/>
+</g>
+<!-- Pengaduan -->
+<g id="node12" class="node">
+<title>Pengaduan</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1259.68,-158C1259.68,-158 1174.2,-158 1174.2,-158 1168.2,-158 1162.2,-152 1162.2,-146 1162.2,-146 1162.2,-134 1162.2,-134 1162.2,-128 1168.2,-122 1174.2,-122 1174.2,-122 1259.68,-122 1259.68,-122 1265.68,-122 1271.68,-128 1271.68,-134 1271.68,-134 1271.68,-146 1271.68,-146 1271.68,-152 1265.68,-158 1259.68,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="1216.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Pengaduan / Bantuan</text>
+<text xml:space="preserve" text-anchor="middle" x="1216.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(pengaduan.php)</text>
+</g>
+<!-- DashboardClient&#45;&gt;Pengaduan -->
+<g id="edge12" class="edge">
+<title>DashboardClient-&gt;Pengaduan</title>
+<path fill="none" stroke="#666666" d="M1414.64,-237C1384.88,-219.91 1343.94,-196.4 1343.94,-196.4 1343.94,-196.4 1289.94,-188.4 1289.94,-188.4 1289.94,-188.4 1271.52,-176.44 1253.19,-164.54"/>
+<polygon fill="#666666" stroke="#666666" points="1255.27,-161.72 1244.98,-159.21 1251.46,-167.59 1255.27,-161.72"/>
+</g>
+<!-- Profile -->
+<g id="node13" class="node">
+<title>Profile</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1975.97,-158C1975.97,-158 1907.9,-158 1907.9,-158 1901.9,-158 1895.9,-152 1895.9,-146 1895.9,-146 1895.9,-134 1895.9,-134 1895.9,-128 1901.9,-122 1907.9,-122 1907.9,-122 1975.97,-122 1975.97,-122 1981.97,-122 1987.97,-128 1987.97,-134 1987.97,-134 1987.97,-146 1987.97,-146 1987.97,-152 1981.97,-158 1975.97,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="1941.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Profile Pengguna</text>
+<text xml:space="preserve" text-anchor="middle" x="1941.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(profile.php)</text>
+</g>
+<!-- DashboardClient&#45;&gt;Profile -->
+<g id="edge13" class="edge">
+<title>DashboardClient-&gt;Profile</title>
+<path fill="none" stroke="#666666" d="M1514.99,-243.72C1637.54,-225.04 1877.94,-188.4 1877.94,-188.4 1877.94,-188.4 1893.5,-176.88 1909.27,-165.19"/>
+<polygon fill="#666666" stroke="#666666" points="1911.3,-168.05 1917.25,-159.28 1907.14,-162.42 1911.3,-168.05"/>
+</g>
+<!-- Pembayaran -->
+<g id="node11" class="node">
+<title>Pembayaran</title>
+<path fill="#ffffff" stroke="#cccccc" d="M1414.34,-52C1414.34,-52 1321.54,-52 1321.54,-52 1315.54,-52 1309.54,-46 1309.54,-40 1309.54,-40 1309.54,-28 1309.54,-28 1309.54,-22 1315.54,-16 1321.54,-16 1321.54,-16 1414.34,-16 1414.34,-16 1420.34,-16 1426.34,-22 1426.34,-28 1426.34,-28 1426.34,-40 1426.34,-40 1426.34,-46 1420.34,-52 1414.34,-52"/>
+<text xml:space="preserve" text-anchor="middle" x="1367.94" y="-37.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Pembayaran / Upgrade</text>
+<text xml:space="preserve" text-anchor="middle" x="1367.94" y="-24.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(pembayaran.php)</text>
+</g>
+<!-- Langganan&#45;&gt;Pembayaran -->
+<g id="edge14" class="edge">
+<title>Langganan-&gt;Pembayaran</title>
+<path fill="none" stroke="#666666" d="M1769.14,-121.5C1758.38,-117.3 1749.94,-114 1749.94,-114 1749.94,-114 1548.05,-72.25 1437.81,-49.45"/>
+<polygon fill="#666666" stroke="#666666" points="1438.77,-46.07 1428.27,-47.48 1437.35,-52.93 1438.77,-46.07"/>
+<text xml:space="preserve" text-anchor="middle" x="1688.59" y="-84" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Proses Upgrade Tier</text>
+</g>
+<!-- DashboardOperator&#45;&gt;Logout -->
+<g id="edge22" class="edge">
+<title>DashboardOperator-&gt;Logout</title>
+<path fill="none" stroke="#666666" d="M994.79,-237.18C981.75,-218.69 960.87,-189.1 945.72,-167.62"/>
+<polygon fill="#666666" stroke="#666666" points="948.7,-165.78 940.08,-159.62 942.98,-169.81 948.7,-165.78"/>
+</g>
+<!-- DashboardOperator&#45;&gt;Pembayaran -->
+<g id="edge16" class="edge">
+<title>DashboardOperator-&gt;Pembayaran</title>
+<path fill="none" stroke="#ff9800" stroke-dasharray="5,2" d="M1012.56,-236.9C1024.65,-199.27 1052.03,-114 1052.03,-114 1052.03,-114 1205.19,-75.7 1298.23,-52.43"/>
+<polygon fill="#ff9800" stroke="#ff9800" points="1298.94,-55.86 1307.79,-50.04 1297.24,-49.07 1298.94,-55.86"/>
+<text xml:space="preserve" text-anchor="middle" x="1097.98" y="-137" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Verifikasi Pembayaran</text>
+</g>
+<!-- DashboardOperator&#45;&gt;Pengaduan -->
+<g id="edge15" class="edge">
+<title>DashboardOperator-&gt;Pengaduan</title>
+<path fill="none" stroke="#ff9800" stroke-dasharray="5,2" d="M1040.57,-237.06C1078.49,-217.5 1134.94,-188.4 1134.94,-188.4 1134.94,-188.4 1156.2,-176.11 1177.07,-164.05"/>
+<polygon fill="#ff9800" stroke="#ff9800" points="1178.65,-167.17 1185.56,-159.14 1175.15,-161.11 1178.65,-167.17"/>
+<text xml:space="preserve" text-anchor="middle" x="1159.34" y="-199.4" font-family="Helvetica,Arial,sans-serif" font-size="10.00">Tindak Lanjut Tiket</text>
+</g>
+<!-- DashboardAdmin&#45;&gt;Logout -->
+<g id="edge23" class="edge">
+<title>DashboardAdmin-&gt;Logout</title>
+<path fill="none" stroke="#666666" d="M653.65,-242.45C731.17,-223.43 873.94,-188.4 873.94,-188.4 873.94,-188.4 886.35,-177.3 899.16,-165.85"/>
+<polygon fill="#666666" stroke="#666666" points="901.26,-168.67 906.38,-159.39 896.59,-163.45 901.26,-168.67"/>
+</g>
+<!-- SystemConfig -->
+<g id="node16" class="node">
+<title>SystemConfig</title>
+<path fill="#ffffff" stroke="#cccccc" d="M297.39,-158C297.39,-158 216.49,-158 216.49,-158 210.49,-158 204.49,-152 204.49,-146 204.49,-146 204.49,-134 204.49,-134 204.49,-128 210.49,-122 216.49,-122 216.49,-122 297.39,-122 297.39,-122 303.39,-122 309.39,-128 309.39,-134 309.39,-134 309.39,-146 309.39,-146 309.39,-152 303.39,-158 297.39,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="256.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">System Config</text>
+<text xml:space="preserve" text-anchor="middle" x="256.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(system-config.php)</text>
+</g>
+<!-- DashboardAdmin&#45;&gt;SystemConfig -->
+<g id="edge17" class="edge">
+<title>DashboardAdmin-&gt;SystemConfig</title>
+<path fill="none" stroke="#666666" d="M556.05,-242.75C476.53,-223.81 327.94,-188.4 327.94,-188.4 327.94,-188.4 310.03,-176.44 292.19,-164.54"/>
+<polygon fill="#666666" stroke="#666666" points="294.49,-161.86 284.23,-159.22 290.61,-167.68 294.49,-161.86"/>
+</g>
+<!-- AuditLogs -->
+<g id="node17" class="node">
+<title>AuditLogs</title>
+<path fill="#ffffff" stroke="#cccccc" d="M420.22,-158C420.22,-158 357.65,-158 357.65,-158 351.65,-158 345.65,-152 345.65,-146 345.65,-146 345.65,-134 345.65,-134 345.65,-128 351.65,-122 357.65,-122 357.65,-122 420.22,-122 420.22,-122 426.22,-122 432.22,-128 432.22,-134 432.22,-134 432.22,-146 432.22,-146 432.22,-152 426.22,-158 420.22,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="388.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Audit Logs</text>
+<text xml:space="preserve" text-anchor="middle" x="388.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(audit-logs.php)</text>
+</g>
+<!-- DashboardAdmin&#45;&gt;AuditLogs -->
+<g id="edge18" class="edge">
+<title>DashboardAdmin-&gt;AuditLogs</title>
+<path fill="none" stroke="#666666" d="M564.48,-237.06C518.85,-217.5 450.94,-188.4 450.94,-188.4 450.94,-188.4 435.87,-176.88 420.58,-165.19"/>
+<polygon fill="#666666" stroke="#666666" points="422.95,-162.59 412.88,-159.3 418.69,-168.15 422.95,-162.59"/>
+</g>
+<!-- LanggananAdmin -->
+<g id="node18" class="node">
+<title>LanggananAdmin</title>
+<path fill="#ffffff" stroke="#cccccc" d="M575.41,-158C575.41,-158 480.47,-158 480.47,-158 474.47,-158 468.47,-152 468.47,-146 468.47,-146 468.47,-134 468.47,-134 468.47,-128 474.47,-122 480.47,-122 480.47,-122 575.41,-122 575.41,-122 581.41,-122 587.41,-128 587.41,-134 587.41,-134 587.41,-146 587.41,-146 587.41,-152 581.41,-158 575.41,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="527.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Kelola Langganan</text>
+<text xml:space="preserve" text-anchor="middle" x="527.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(langganan-admin.php)</text>
+</g>
+<!-- DashboardAdmin&#45;&gt;LanggananAdmin -->
+<g id="edge19" class="edge">
+<title>DashboardAdmin-&gt;LanggananAdmin</title>
+<path fill="none" stroke="#666666" d="M593.24,-237.18C580.75,-218.78 560.78,-189.37 546.21,-167.91"/>
+<polygon fill="#666666" stroke="#666666" points="549.11,-165.94 540.59,-159.64 543.32,-169.88 549.11,-165.94"/>
+</g>
+<!-- PengaduanAdmin -->
+<g id="node19" class="node">
+<title>PengaduanAdmin</title>
+<path fill="#ffffff" stroke="#cccccc" d="M732.63,-158C732.63,-158 635.25,-158 635.25,-158 629.25,-158 623.25,-152 623.25,-146 623.25,-146 623.25,-134 623.25,-134 623.25,-128 629.25,-122 635.25,-122 635.25,-122 732.63,-122 732.63,-122 738.63,-122 744.63,-128 744.63,-134 744.63,-134 744.63,-146 744.63,-146 744.63,-152 738.63,-158 732.63,-158"/>
+<text xml:space="preserve" text-anchor="middle" x="683.94" y="-143.3" font-family="Helvetica,Arial,sans-serif" font-size="11.00">Kelola Pengaduan</text>
+<text xml:space="preserve" text-anchor="middle" x="683.94" y="-130.1" font-family="Helvetica,Arial,sans-serif" font-size="11.00">(pengaduan-admin.php)</text>
+</g>
+<!-- DashboardAdmin&#45;&gt;PengaduanAdmin -->
+<g id="edge20" class="edge">
+<title>DashboardAdmin-&gt;PengaduanAdmin</title>
+<path fill="none" stroke="#666666" d="M616.94,-237.18C629.81,-218.69 650.43,-189.1 665.4,-167.62"/>
+<polygon fill="#666666" stroke="#666666" points="668.12,-169.83 670.96,-159.63 662.37,-165.83 668.12,-169.83"/>
+</g>
+</g>
+</svg>

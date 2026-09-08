@@ -1,0 +1,61 @@
+import jwt from 'jsonwebtoken';
+
+export const jwtMiddleware = (req, res, next) => {
+  // Public routes that don't need token (e.g. login, register).
+  // Use exact path match (no query string) to avoid prefix collisions.
+  const publicRoutes = new Set([
+    '/api/bank/auth/login',
+    '/api/bank/auth/register',
+    '/api/bank/health',
+    '/api/bank/public/stats',
+    '/api/bank/public/landing',
+    '/api/wallet/v1/auth/login',
+    '/api/wallet/v1/auth/register',
+  ]);
+  const pathOnly = req.originalUrl.split('?')[0];
+  if (publicRoutes.has(pathOnly)) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({
+      success: false,
+      data: null,
+      error: { code: 'UNAUTHORIZED', message: 'Token tidak ditemukan atau format salah', details: {} },
+      meta: { request_id: req.id || 'req_unknown', timestamp: new Date().toISOString() },
+    });
+    return;
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    // Note: In real app, secret should match what Central-Bank/Wallet uses
+    const secret = process.env.JWT_SECRET;
+    if (!secret) throw new Error('JWT_SECRET wajib dikonfigurasi');
+    const decoded = jwt.verify(token, secret, {
+      algorithms: ['HS256'], // M6: pin algorithm prevent downgrade
+      issuer: process.env.JWT_ISSUER || 'smartbank',
+      audience: process.env.JWT_AUDIENCE || 'smartbank-clients',
+    });
+    req.user = decoded;
+
+    // Pass user info to downstream via headers
+    const safeUserId = String(decoded.userId || decoded.sub).slice(0, 64);
+    const safeRole = String(decoded.role || '').slice(0, 32);
+
+    req.headers['x-user-id'] = safeUserId;
+    req.headers['x-user-role'] = /^[A-Za-z0-9_]+$/.test(safeRole) ? safeRole : 'unknown';
+
+    next();
+  } catch (err) {
+    res.status(401).json({
+      success: false,
+      data: null,
+      error: { code: 'UNAUTHORIZED', message: 'Token tidak valid atau kedaluwarsa', details: {} },
+      meta: { request_id: req.id || 'req_unknown', timestamp: new Date().toISOString() },
+    });
+    return;
+  }
+};

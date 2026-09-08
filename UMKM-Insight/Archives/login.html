@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Insight — Masuk</title>
+    <meta name="description" content="Masuk ke akun UMKM Insight Anda untuk mengakses dashboard analitik bisnis.">
+    <link rel="stylesheet" href="shared.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body{min-height:100vh;display:flex;}
+        .auth-left{flex:1;background:linear-gradient(135deg,#0f172a 0%,#134e4a 50%,#0d9488 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px;position:relative;overflow:hidden;}
+        .auth-left::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+        .auth-left-content{position:relative;z-index:2;max-width:400px;text-align:center;color:white;}
+        .auth-left-content h2{font-size:2rem;font-weight:800;margin-bottom:16px;letter-spacing:-0.02em;}
+        .auth-left-content p{font-size:.9375rem;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:32px;}
+        .auth-left .feature-pills{display:flex;flex-direction:column;gap:12px;}
+        .auth-left .pill{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);padding:14px 20px;border-radius:var(--radius-xl);text-align:left;}
+        .auth-left .pill i{font-size:1.5rem;color:var(--brand-300);flex-shrink:0;}
+        .auth-left .pill span{font-size:.8125rem;color:rgba(255,255,255,0.85);}
+        .orb{position:absolute;border-radius:50%;filter:blur(80px);z-index:1;}
+        .orb-1{width:300px;height:300px;background:rgba(20,184,166,0.15);top:-60px;right:-40px;}
+        .orb-2{width:250px;height:250px;background:rgba(99,102,241,0.1);bottom:-50px;left:-30px;}
+
+        .auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 24px;background:var(--surface);}
+        .auth-card{width:100%;max-width:420px;animation:fadeIn 0.5s ease-out;}
+        .auth-card .logo{display:flex;align-items:center;gap:10px;margin-bottom:36px;}
+        .auth-card .logo i{font-size:2rem;color:var(--brand-600);}
+        .auth-card .logo span{font-size:1.5rem;font-weight:800;color:var(--text-primary);letter-spacing:-0.02em;}
+        .auth-card h1{font-size:1.625rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;}
+        .auth-card .subtitle{font-size:.875rem;color:var(--text-secondary);margin-bottom:32px;}
+        .auth-form{display:flex;flex-direction:column;gap:20px;}
+        .auth-form .form-group{position:relative;}
+        .auth-card .divider{text-align:center;color:var(--text-muted);font-size:.8125rem;margin:24px 0;position:relative;}
+        .auth-card .divider::before,.auth-card .divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--border);}
+        .auth-card .divider::before{left:0;}
+        .auth-card .divider::after{right:0;}
+        .auth-card .footer-text{text-align:center;font-size:.8125rem;color:var(--text-secondary);margin-top:24px;}
+        .auth-card .footer-text a{color:var(--brand-600);font-weight:600;text-decoration:none;}
+        .auth-card .footer-text a:hover{text-decoration:underline;}
+        .form-row{display:flex;justify-content:space-between;align-items:center;}
+        .form-row a{font-size:.8125rem;color:var(--brand-600);text-decoration:none;font-weight:500;}
+        .form-row a:hover{text-decoration:underline;}
+        .login-hint{background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-top:16px;font-size:.75rem;color:var(--text-secondary);line-height:1.6;}
+        .login-hint strong{color:var(--text-primary);}
+        @media(max-width:768px){
+            .auth-left{display:none;}
+            body{flex-direction:column;}
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Panel -->
+    <div class="auth-left">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="auth-left-content">
+            <h2>Analitik Bisnis yang Powerful</h2>
+            <p>Pantau kinerja UMKM Anda dengan dashboard interaktif yang terhubung langsung ke SmartBank.</p>
+            <div class="feature-pills">
+                <div class="pill"><i class="ph-fill ph-trend-up"></i><span>Laporan penjualan real-time dari SmartBank</span></div>
+                <div class="pill"><i class="ph-fill ph-money"></i><span>Arus kas masuk & keluar terperinci</span></div>
+                <div class="pill"><i class="ph-fill ph-package"></i><span>Performa produk dari Marketplace & POS</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Panel — Login Form -->
+    <div class="auth-right">
+        <div class="auth-card">
+            <div class="logo"><i class="ph-fill ph-chart-polar"></i><span>UMKM Insight</span></div>
+            <h1>Selamat Datang Kembali</h1>
+            <p class="subtitle">Masuk untuk mengelola wawasan bisnis Anda.</p>
+
+            <form class="auth-form" id="login-form" onsubmit="return handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div style="position:relative;">
+                        <i class="ph ph-user form-input-icon"></i>
+                        <input type="text" id="input-username" class="form-input has-icon" placeholder="Masukkan username" autocomplete="username">
+                    </div>
+                    <span class="form-error" id="err-username">Username wajib diisi</span>
+                </div>
+                <div class="form-group">
+                    <div class="form-row">
+                        <label class="form-label">Password</label>
+                        <a href="#">Lupa Password?</a>
+                    </div>
+                    <div style="position:relative;">
+                        <i class="ph ph-lock form-input-icon"></i>
+                        <input type="password" id="input-password" class="form-input has-icon" placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                    <span class="form-error" id="err-password">Password wajib diisi</span>
+                </div>
+                <span class="form-error" id="err-general" style="text-align:center;"></span>
+                <button type="submit" class="btn btn-primary btn-full btn-lg" id="btn-login">
+                    <i class="ph ph-sign-in"></i> Masuk
+                </button>
+            </form>
+
+            <p class="footer-text">Belum punya akun? <a href="register.html">Daftar Sekarang</a></p>
+
+            <div class="login-hint">
+                <strong>Demo Accounts:</strong><br>
+                Client: <code>budi</code> / <code>password</code><br>
+                Operator: <code>op_jaya</code> / <code>operator123</code><br>
+                Admin: <code>admin_super</code> / <code>admin123</code>
+            </div>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        // If already logged in, redirect
+        initData();
+        const existingSession = getSession();
+        if (existingSession) {
+            if (existingSession.role === 'admin') window.location.href = 'admin.html';
+            else if (existingSession.role === 'operator') window.location.href = 'operator.html';
+            else window.location.href = 'dashboard.html';
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            // Reset errors
+            document.querySelectorAll('.form-error').forEach(el => el.classList.remove('visible'));
+
+            const username = document.getElementById('input-username').value.trim();
+            const password = document.getElementById('input-password').value;
+            let valid = true;
+
+            if (!username) { document.getElementById('err-username').classList.add('visible'); valid = false; }
+            if (!password) { document.getElementById('err-password').classList.add('visible'); valid = false; }
+            if (!valid) return false;
+
+            const user = login(username, password);
+            if (!user) {
+                const errGen = document.getElementById('err-general');
+                errGen.textContent = 'Username atau password salah.';
+                errGen.classList.add('visible');
+                return false;
+            }
+
+            // Role-based routing
+            if (user.role === 'admin') window.location.href = 'admin.html';
+            else if (user.role === 'operator') window.location.href = 'operator.html';
+            else window.location.href = 'dashboard.html';
+            return false;
+        }
+    </script>
+</body>
+</html>

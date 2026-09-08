@@ -1,0 +1,11 @@
+.api-docs-page { min-height: 100vh; background: #fafafa; color: #111827; }
+.api-docs-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .9rem 1.5rem; color: #fff; background: linear-gradient(120deg, #071c2c, #0b4a56); box-shadow: 0 2px 12px #0003; }
+.api-docs-header > div { display: flex; flex-direction: column; }
+.api-docs-header strong { font-size: 1.05rem; }
+.api-docs-header span { font-size: .75rem; opacity: .78; }
+.api-docs-header label { display: flex; align-items: center; gap: .65rem; font-size: .8rem; }
+.api-docs-header select { min-width: 190px; border: 1px solid #ffffff55; border-radius: .5rem; padding: .5rem .75rem; color: #fff; background: #ffffff18; }
+.api-docs-header option { color: #111827; background: #fff; }
+.api-docs-page .swagger-ui .topbar { display: none; }
+.api-docs-page .swagger-ui .information-container { padding-top: 28px; }
+@media (max-width: 640px) { .api-docs-header { align-items: stretch; flex-direction: column; } .api-docs-header label { justify-content: space-between; } .api-docs-header select { flex: 1; } }

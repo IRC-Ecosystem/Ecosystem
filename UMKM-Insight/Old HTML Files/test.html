@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Insight - Dashboard Ekosistem</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Custom scrollbar for table */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col hidden md:flex z-10">
+        <div class="h-16 flex items-center px-6 border-b border-slate-200">
+            <i class="ph-fill ph-chart-polar text-brand-600 text-2xl mr-2"></i>
+            <span class="font-bold text-lg tracking-tight text-slate-900">UMKM Insight</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-3">
+                <li>
+                    <a href="#" class="flex items-center px-3 py-2.5 bg-brand-50 text-brand-600 rounded-lg font-medium">
+                        <i class="ph ph-squares-four text-lg mr-3"></i>
+                        Dashboard Analytics
+                    </a>
+                </li>
+                <li>
+                    <a href="#"
+                        class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg font-medium transition-colors">
+                        <i class="ph ph-trend-up text-lg mr-3"></i>
+                        Laporan Penjualan
+                    </a>
+                </li>
+                <li>
+                    <a href="#"
+                        class="flex items-center px-3 py-2.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg font-medium transition-colors">
+                        <i class="ph ph-money text-lg mr-3"></i>
+                        Arus Kas (Cashflow)
+                    </a>
+                </li>
+            </ul>
+
+            <div class="mt-8 px-6">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Integrasi Sistem</h3>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex items-start">
+                    <i class="ph-fill ph-check-circle text-green-500 mt-0.5 mr-2"></i>
+                    <div>
+                        <p class="text-sm font-medium text-slate-700">SmartBank Connected</p>
+                        <p class="text-xs text-slate-500 mt-1">Status: Read-only API<br>GET /analytics/dashboard</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- Topbar -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10">
+            <div class="flex items-center md:hidden">
+                <button class="text-slate-500 hover:text-slate-700">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                <span class="ml-3 font-bold text-lg text-slate-900">UMKM Insight</span>
+            </div>
+            <div class="hidden md:flex items-center text-sm text-slate-500">
+                <i class="ph ph-info mr-2 text-brand-600"></i>
+                <span>Observer Node - Skema Ekonomi RPL 2</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="text-slate-400 hover:text-brand-600 transition-colors">
+                    <i class="ph ph-bell text-xl"></i>
+                </button>
+                <div
+                    class="h-8 w-8 rounded-full bg-brand-100 flex items-center justify-center border border-brand-200 text-brand-600 font-bold">
+                    U
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Dashboard Content -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 w-full" id="dashboard-content">
+
+            <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Dashboard Agregasi Data</h1>
+                    <p class="text-slate-500 text-sm mt-1">Data ditarik secara aman dari ledger transaksi SmartBank.</p>
+                </div>
+                <button onclick="refreshData()"
+                    class="flex items-center justify-center px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                    <i class="ph ph-arrows-clockwise mr-2" id="refresh-icon"></i> Sinkronisasi
+                </button>
+            </div>
+
+            <!-- SECTION INPUT: Filter Panel -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 mb-6">
+                <div class="flex items-center mb-4">
+                    <i class="ph ph-funnel text-brand-600 text-lg mr-2"></i>
+                    <h2 class="text-sm font-bold text-slate-800">Parameter Kueri Data (Input API)</h2>
+                </div>
+
+                <form id="filter-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                    <!-- Input 1: Tanggal Mulai -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1.5">Mulai Tanggal</label>
+                        <input type="date" id="input-start-date"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 p-2.5 outline-none transition-all">
+                    </div>
+
+                    <!-- Input 2: Tanggal Akhir -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1.5">Sampai Tanggal</label>
+                        <input type="date" id="input-end-date"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 p-2.5 outline-none transition-all">
+                    </div>
+
+                    <!-- Input 3: Sumber Transaksi -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1.5">Sumber Sistem</label>
+                        <select id="input-source"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 p-2.5 outline-none transition-all">
+                            <option value="all">Semua Ekosistem</option>
+                            <option value="marketplace">Marketplace (PasarKita)</option>
+                            <option value="pos">POS Kasir</option>
+                            <option value="b2b">SupplierHub</option>
+                        </select>
+                    </div>
+
+                    <!-- Input 4: Spesifik UMKM ID -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 mb-1.5">ID UMKM (Opsional)</label>
+                        <input type="text" id="input-umkm-id" placeholder="Mis: UMKM-001"
+                            class="w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-brand-500 focus:border-brand-500 p-2.5 outline-none transition-all">
+                    </div>
+
+                    <!-- Button Submit -->
+                    <div>
+                        <button type="button" onclick="applyFilters()"
+                            class="w-full flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg text-sm px-4 py-2.5 transition-colors shadow-sm">
+                            <i class="ph ph-magnifying-glass mr-2"></i> Terapkan Filter
+                        </button>
+                    </div>
+                </form>
+                <p class="text-[11px] text-slate-400 mt-3"><i class="ph-fill ph-info"></i> Parameter ini akan dikirim
+                    sebagai query parameter: <code
+                        class="bg-slate-100 px-1 rounded text-slate-600">GET /analytics/dashboard?start=...&source=...</code>
+                </p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-medium text-slate-500">Total Pendapatan</h3>
+                        <div class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
+                            <i class="ph ph-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900" id="kpi-revenue">Rp 0</div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-medium text-slate-500">Total Transaksi</h3>
+                        <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                            <i class="ph ph-receipt"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900" id="kpi-trx">0</div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-medium text-slate-500">Pajak & Fee (Money Sink)</h3>
+                        <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center">
+                            <i class="ph ph-bank"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900" id="kpi-fee">Rp 0</div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-medium text-slate-500">Arus Kas Keluar (Kulakan)</h3>
+                        <div class="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                            <i class="ph ph-shopping-cart"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-slate-900" id="kpi-expense">Rp 0</div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Line Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 lg:col-span-2">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4">Tren Arus Kas (Cashflow)</h2>
+                    <div class="relative h-72 w-full">
+                        <canvas id="cashflowChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Doughnut Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4">Sumber Pendapatan</h2>
+                    <div class="relative h-56 w-full flex justify-center">
+                        <canvas id="sourceChart"></canvas>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
+                        <div class="flex items-center"><span
+                                class="w-3 h-3 rounded-full bg-brand-500 mr-2"></span>Marketplace</div>
+                        <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>POS
+                            (Kasir)</div>
+                        <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-orange-400 mr-2"></span>B2B
+                            / Supplier</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 & Table -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Bar Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4">Performa Produk Top</h2>
+                    <div class="relative h-64 w-full">
+                        <canvas id="productChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Data Table (Read-only Ledger) -->
+                <div
+                    class="bg-white rounded-xl shadow-sm border border-slate-100 lg:col-span-2 overflow-hidden flex flex-col">
+                    <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">Riwayat Transaksi Tersaring</h2>
+                            <p class="text-xs text-slate-500 mt-1">Sesuai parameter kueri</p>
+                        </div>
+                    </div>
+                    <div class="table-container overflow-x-auto flex-1 p-0">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-semibold border-b border-slate-200">ID Transaksi</th>
+                                    <th class="p-4 font-semibold border-b border-slate-200">Tipe</th>
+                                    <th class="p-4 font-semibold border-b border-slate-200">Sumber</th>
+                                    <th class="p-4 font-semibold border-b border-slate-200 text-right">Nominal</th>
+                                    <th class="p-4 font-semibold border-b border-slate-200">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm text-slate-700 divide-y divide-slate-100" id="table-body">
+                                <!-- Data populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="mt-8 text-center text-xs text-slate-400 py-4 border-t border-slate-200">
+                &copy; 2026 Ekosistem Ekonomi UMKM. Simulasi Sistem Informasi RPL 2.
+            </footer>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay"
+            class="absolute inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center transition-opacity duration-300">
+            <i class="ph ph-spinner-gap animate-spin text-4xl text-brand-600 mb-3"></i>
+            <p class="text-slate-600 font-medium" id="loading-text">Mengambil data dari SmartBank...</p>
+        </div>
+    </main>
+
+    <script>
+        // Set Default Dates to inputs
+        const today = new Date();
+        const lastWeek = new Date(today);
+        lastWeek.setDate(lastWeek.getDate() - 7);
+
+        document.getElementById('input-start-date').valueAsDate = lastWeek;
+        document.getElementById('input-end-date').valueAsDate = today;
+
+        // Utilities
+        const formatRupiah = (number) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(number);
+        };
+
+        // Chart Instances
+        let cashflowChart, sourceChart, productChart;
+
+        // Base Mock Data
+        const baseKpi = { revenue: 45250000, transactions: 1248, feeSystem: 1357500, expense: 28400000 };
+        const baseCashflowMasuk = [4200000, 5100000, 3800000, 6200000, 7500000, 9100000, 9350000];
+        const baseCashflowKeluar = [2100000, 1800000, 4500000, 2000000, 6000000, 5000000, 7000000];
+        const baseProducts = [1200, 850, 640, 520, 410];
+
+        // Simulate fetching API with parameters
+        const fetchDashboardData = async (filterFactor = 1.0) => {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    // Randomize slightly based on filter factor to simulate changing data
+                    const randomizeArray = (arr) => arr.map(val => Math.floor(val * filterFactor * (0.8 + Math.random() * 0.4)));
+
+                    resolve({
+                        kpi: {
+                            revenue: Math.floor(baseKpi.revenue * filterFactor),
+                            transactions: Math.floor(baseKpi.transactions * filterFactor),
+                            feeSystem: Math.floor(baseKpi.feeSystem * filterFactor),
+                            expense: Math.floor(baseKpi.expense * filterFactor)
+                        },
+                        charts: {
+                            cashflow: {
+                                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                                masuk: randomizeArray(baseCashflowMasuk),
+                                keluar: randomizeArray(baseCashflowKeluar)
+                            },
+                            source: [
+                                Math.floor(60 * (Math.random() + 0.5)),
+                                Math.floor(30 * (Math.random() + 0.5)),
+                                Math.floor(10 * (Math.random() + 0.5))
+                            ],
+                            products: {
+                                labels: ['Kopi Susu', 'Keripik Singkong', 'Baju Rajut', 'Sambal Roa', 'Kue Kering'],
+                                data: randomizeArray(baseProducts)
+                            }
+                        },
+                        recentTransactions: [
+                            { id: `TRX-${Math.floor(Math.random() * 9000) + 1000}`, type: 'Penjualan', source: 'Marketplace', amount: 150000, status: 'Success' },
+                            { id: `TRX-${Math.floor(Math.random() * 9000) + 1000}`, type: 'Penjualan', source: 'POS', amount: 45000, status: 'Success' },
+                            { id: `TRX-${Math.floor(Math.random() * 9000) + 1000}`, type: 'Potongan Fee', source: 'SmartBank', amount: -3000, status: 'Success' },
+                            { id: `TRX-${Math.floor(Math.random() * 9000) + 1000}`, type: 'Pembelian Stok', source: 'SupplierHub', amount: -2500000, status: 'Success' },
+                            { id: `TRX-${Math.floor(Math.random() * 9000) + 1000}`, type: 'Ongkos Kirim', source: 'LogistiKita', amount: -15000, status: 'Success' }
+                        ]
+                    });
+                }, 800); // Simulate network latency
+            });
+        };
+
+        const renderCharts = (data) => {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b';
+
+            // 1. Cashflow Line Chart
+            const ctxCashflow = document.getElementById('cashflowChart').getContext('2d');
+            if (cashflowChart) cashflowChart.destroy();
+            cashflowChart = new Chart(ctxCashflow, {
+                type: 'line',
+                data: {
+                    labels: data.charts.cashflow.labels,
+                    datasets: [
+                        { label: 'Kas Masuk', data: data.charts.cashflow.masuk, borderColor: '#14b8a6', backgroundColor: 'rgba(20, 184, 166, 0.1)', borderWidth: 2, fill: true, tension: 0.4 },
+                        { label: 'Kas Keluar', data: data.charts.cashflow.keluar, borderColor: '#f43f5e', backgroundColor: 'transparent', borderWidth: 2, borderDash: [5, 5], tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } }, x: { grid: { display: false } } } }
+            });
+
+            // 2. Source Doughnut Chart
+            const ctxSource = document.getElementById('sourceChart').getContext('2d');
+            if (sourceChart) sourceChart.destroy();
+            sourceChart = new Chart(ctxSource, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Marketplace', 'POS (Kasir)', 'B2B / Supplier'],
+                    datasets: [{ data: data.charts.source, backgroundColor: ['#14b8a6', '#3b82f6', '#fb923c'], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+            });
+
+            // 3. Top Products Bar Chart
+            const ctxProduct = document.getElementById('productChart').getContext('2d');
+            if (productChart) productChart.destroy();
+            productChart = new Chart(ctxProduct, {
+                type: 'bar',
+                data: {
+                    labels: data.charts.products.labels,
+                    datasets: [{ label: 'Terjual', data: data.charts.products.data, backgroundColor: '#6366f1', borderRadius: 4 }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true }, y: { grid: { display: false } } } }
+            });
+        };
+
+        const renderTable = (transactions) => {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            transactions.forEach(trx => {
+                const isExpense = trx.amount < 0;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-xs text-slate-500">${trx.id}</td>
+                    <td class="p-4 font-medium text-slate-800">${trx.type}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">${trx.source}</span></td>
+                    <td class="p-4 text-right font-semibold ${isExpense ? 'text-red-600' : 'text-green-600'}">${isExpense ? '-' : '+'}${formatRupiah(Math.abs(trx.amount))}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700"><i class="ph-fill ph-check-circle mr-1"></i>${trx.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        const updateKPIs = (kpi) => {
+            document.getElementById('kpi-revenue').innerText = formatRupiah(kpi.revenue);
+            document.getElementById('kpi-trx').innerText = new Intl.NumberFormat('id-ID').format(kpi.transactions);
+            document.getElementById('kpi-fee').innerText = formatRupiah(kpi.feeSystem);
+            document.getElementById('kpi-expense').innerText = formatRupiah(kpi.expense);
+        };
+
+        // Main loader function
+        const loadDashboard = async (filterFactor = 1.0, msg = "Mengambil data agregasi dari SmartBank...") => {
+            const overlay = document.getElementById('loading-overlay');
+            const refreshIcon = document.getElementById('refresh-icon');
+            document.getElementById('loading-text').innerText = msg;
+
+            overlay.classList.remove('hidden');
+            if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+            try {
+                const data = await fetchDashboardData(filterFactor);
+                updateKPIs(data.kpi);
+                renderCharts(data);
+                renderTable(data.recentTransactions);
+            } catch (error) {
+                console.error("Failed fetching dashboard data", error);
+            } finally {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    overlay.style.opacity = '1';
+                    if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+                }, 300);
+            }
+        };
+
+        // Triggered by "Terapkan Filter" button
+        window.applyFilters = () => {
+            const source = document.getElementById('input-source').value;
+            const umkmId = document.getElementById('input-umkm-id').value;
+
+            // Just logic to make the dummy data change depending on the select input
+            let factor = 1.0;
+            if (source === 'marketplace') factor = 0.6;
+            else if (source === 'pos') factor = 0.3;
+            else if (source === 'b2b') factor = 0.1;
+
+            if (umkmId) factor = factor * 0.05; // If specific UMKM, data is way smaller
+
+            loadDashboard(factor, "Menerapkan kueri parameter data...");
+        };
+
+        window.refreshData = () => {
+            document.getElementById('filter-form').reset();
+            loadDashboard(1.0, "Menyinkronkan ulang data ledger...");
+        };
+
+        // Initialize on mount
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+        });
+    </script>
+</body>
+
+</html>

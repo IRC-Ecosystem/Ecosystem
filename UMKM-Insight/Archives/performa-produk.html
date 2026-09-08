@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMKM Insight — Performa Produk</title>
+    <link rel="stylesheet" href="shared.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e'}}}}}</script>
+    <style>
+        body{display:flex;height:100vh;overflow:hidden;}
+        .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        .main-content{flex:1;overflow-y:auto;padding:24px;background:var(--surface);}
+        .chart-card{padding:24px;}
+        .chart-card h3{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+        .filter-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;padding:20px;margin-bottom:24px;}
+        .filter-bar .form-group{min-width:140px;flex:1;}
+        .source-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:.75rem;font-weight:600;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;}
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+        .product-row{display:flex;align-items:center;gap:16px;padding:14px 16px;border-bottom:1px solid var(--border-light);transition:background .15s;}
+        .product-row:hover{background:var(--surface-alt);}
+        .product-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;}
+        .product-bar{height:8px;border-radius:999px;background:var(--border);flex:1;position:relative;overflow:hidden;}
+        .product-bar-fill{height:100%;border-radius:999px;transition:width .6s ease-out;}
+        .star{color:#f59e0b;font-size:.75rem;}
+        @media(max-width:1024px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+    <div id="sidebar-container"></div>
+    <div class="main-wrap">
+        <div id="topbar-container"></div>
+        <div class="main-content">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px;" class="animate-fade-in">
+                <div>
+                    <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);">Performa Produk</h1>
+                    <p style="font-size:.8125rem;color:var(--text-secondary);margin-top:4px;display:flex;align-items:center;gap:8px;">Analisis penjualan & tren produk <span class="source-badge"><i class="ph-fill ph-storefront"></i> Marketplace / POS</span></p>
+                </div>
+                <button onclick="location.reload()" class="btn btn-outline btn-sm"><i class="ph ph-arrows-clockwise"></i> Refresh</button>
+            </div>
+
+            <div class="card filter-bar animate-fade-in delay-100">
+                <div class="form-group"><label class="form-label">Mulai</label><input type="date" class="form-input" id="f-start"></div>
+                <div class="form-group"><label class="form-label">Sampai</label><input type="date" class="form-input" id="f-end"></div>
+                <div class="form-group"><label class="form-label">Kategori</label>
+                    <select class="form-select"><option value="all">Semua Kategori</option><option>Makanan</option><option>Minuman</option><option>Fashion</option></select>
+                </div>
+                <div class="form-group"><label class="form-label">Sumber</label>
+                    <select class="form-select"><option value="all">Marketplace & POS</option><option>Marketplace</option><option>POS</option></select>
+                </div>
+                <div><button class="btn btn-primary btn-sm" onclick="showToast('Filter diterapkan','success')"><i class="ph ph-funnel"></i> Filter</button></div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="grid-3 animate-fade-in delay-200" id="kpi-area"></div>
+
+            <!-- FREE: Top Products + Category Distribution -->
+            <div class="grid-2 animate-fade-in delay-300">
+                <div class="card chart-card">
+                    <h3><i class="ph ph-chart-bar" style="color:#6366f1;"></i> Top 5 Produk Terlaris</h3>
+                    <div style="height:260px;"><canvas id="chart-top5"></canvas></div>
+                </div>
+                <div class="card chart-card">
+                    <h3><i class="ph ph-chart-pie" style="color:var(--warning);"></i> Distribusi Kategori</h3>
+                    <div style="height:200px;"><canvas id="chart-category"></canvas></div>
+                    <div id="cat-legend" style="margin-top:16px;display:flex;flex-direction:column;gap:6px;"></div>
+                </div>
+            </div>
+
+            <!-- FREE: Basic Product Table -->
+            <div class="card animate-fade-in delay-400" style="overflow:hidden;margin-bottom:16px;">
+                <div style="padding:20px;border-bottom:1px solid var(--border-light);">
+                    <h3 style="font-size:1rem;font-weight:700;">Daftar Produk</h3>
+                    <p style="font-size:.6875rem;color:var(--text-muted);margin-top:2px;">Data dari Marketplace & POS</p>
+                </div>
+                <div id="product-list"></div>
+            </div>
+
+            <!-- PREMIUM: Trend + Comparison -->
+            <div id="premium-section" style="position:relative;">
+                <div class="grid-2 animate-fade-in delay-500">
+                    <div class="card chart-card">
+                        <h3><i class="ph ph-chart-line-up" style="color:var(--brand-600);"></i> Tren Penjualan per Produk <span class="badge badge-premium" style="font-size:.625rem;">PRO</span></h3>
+                        <div style="height:280px;"><canvas id="chart-trend"></canvas></div>
+                    </div>
+                    <div class="card" style="padding:24px;">
+                        <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;"><i class="ph ph-scales" style="color:#8b5cf6;"></i> Analisis Produk <span class="badge badge-premium" style="font-size:.625rem;">PRO</span></h3>
+                        <div id="product-analysis" style="display:flex;flex-direction:column;gap:10px;"></div>
+                    </div>
+                </div>
+                <div class="card animate-fade-in delay-600" style="padding:20px;margin-bottom:24px;display:flex;justify-content:flex-end;gap:8px;" id="export-row"></div>
+            </div>
+
+            <footer style="text-align:center;font-size:.75rem;color:var(--text-muted);padding:16px;border-top:1px solid var(--border);">&copy; 2026 Ekosistem Ekonomi UMKM</footer>
+        </div>
+    </div>
+
+    <script src="shared.js"></script>
+    <script>
+        const user = initPage('performa', 'client');
+        if (!user) throw new Error('Auth');
+        document.getElementById('sidebar-container').innerHTML = buildSidebar('performa');
+        document.getElementById('topbar-container').innerHTML = buildTopbar(user);
+
+        const premium = isPremium(user);
+        const data = generateProductData();
+        const today = new Date(); const monthAgo = new Date(today); monthAgo.setMonth(monthAgo.getMonth()-1);
+        document.getElementById('f-start').valueAsDate = monthAgo;
+        document.getElementById('f-end').valueAsDate = today;
+
+        // KPIs
+        const totalSold = data.products.reduce((s,p)=>s+p.sold,0);
+        const totalRev = data.products.reduce((s,p)=>s+p.revenue,0);
+        const avgRating = (data.products.reduce((s,p)=>s+p.rating,0)/data.products.length).toFixed(1);
+        document.getElementById('kpi-area').innerHTML = [
+            {l:'Total Terjual',v:formatNumber(totalSold)+' unit',icon:'ph-shopping-bag',bg:'#eff6ff',c:'#2563eb'},
+            {l:'Revenue Produk',v:formatRupiah(totalRev),icon:'ph-currency-circle-dollar',bg:'#ecfdf5',c:'#059669'},
+            {l:'Rating Rata-rata',v:'⭐ '+avgRating+' / 5.0',icon:'ph-star',bg:'#fffbeb',c:'#d97706'}
+        ].map(k=>`<div class="card kpi-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="kpi-label">${k.l}</span><div class="kpi-icon" style="background:${k.bg};color:${k.c};"><i class="ph ${k.icon}"></i></div></div><div class="kpi-value">${k.v}</div></div>`).join('');
+
+        Chart.defaults.font.family = "'Inter'";
+        Chart.defaults.color = '#94a3b8';
+
+        // Top 5 Bar (Free)
+        const top5 = data.products.slice(0,5);
+        new Chart(document.getElementById('chart-top5'),{type:'bar',data:{labels:top5.map(p=>p.name),datasets:[{label:'Terjual',data:top5.map(p=>p.sold),backgroundColor:'#6366f1',borderRadius:4,barThickness:20}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{borderDash:[2,4],color:'#f1f5f9'}},y:{grid:{display:false}}}}});
+
+        // Category Doughnut (Free)
+        const catColors = ['#14b8a6','#3b82f6','#f59e0b'];
+        new Chart(document.getElementById('chart-category'),{type:'doughnut',data:{labels:data.categoryDist.labels,datasets:[{data:data.categoryDist.data,backgroundColor:catColors,borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'72%',plugins:{legend:{display:false}}}});
+        document.getElementById('cat-legend').innerHTML = data.categoryDist.labels.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:.8125rem;"><span style="width:10px;height:10px;border-radius:50%;background:${catColors[i]};flex-shrink:0;"></span>${l} — ${formatNumber(data.categoryDist.data[i])} unit</div>`).join('');
+
+        // Product List (Free=top5, Premium=all)
+        const listProducts = premium ? data.products : data.products.slice(0,5);
+        const maxSold = Math.max(...data.products.map(p=>p.sold));
+        const rankColors = ['#f59e0b','#94a3b8','#cd7f32','var(--surface-alt)','var(--surface-alt)','var(--surface-alt)','var(--surface-alt)','var(--surface-alt)'];
+        const rankBg = ['#fffbeb','#f8fafc','#fff7ed','var(--surface-alt)','var(--surface-alt)'];
+        document.getElementById('product-list').innerHTML = listProducts.map((p,i)=>{
+            const pct = Math.round((p.sold/maxSold)*100);
+            return `<div class="product-row">
+                <div class="product-rank" style="background:${rankBg[i]||'var(--surface-alt)'};color:${rankColors[i]||'var(--text-muted)'};">${i+1}</div>
+                <div style="flex:1;min-width:0;"><p style="font-size:.875rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</p><p style="font-size:.6875rem;color:var(--text-muted);">${p.category} · ⭐ ${p.rating}</p></div>
+                <div style="width:120px;text-align:right;"><p style="font-size:.875rem;font-weight:700;color:var(--text-primary);">${formatNumber(p.sold)}</p><p style="font-size:.6875rem;color:var(--text-muted);">unit</p></div>
+                <div style="width:100px;text-align:right;"><p style="font-size:.8125rem;font-weight:600;color:var(--success);">${formatRupiah(p.revenue)}</p></div>
+                <div class="product-bar" style="max-width:120px;"><div class="product-bar-fill" style="width:${pct}%;background:${i<3?'#6366f1':'#cbd5e1'};"></div></div>
+            </div>`;
+        }).join('');
+
+        if (!premium && data.products.length > 5) {
+            document.getElementById('product-list').innerHTML += `<div style="text-align:center;padding:20px;"><div class="premium-lock-badge" style="position:relative;transform:none;display:inline-flex;cursor:pointer;" onclick="showToast('Upgrade ke Premium untuk melihat semua produk','info')"><i class="ph-fill ph-crown"></i> Lihat semua produk — Premium</div></div>`;
+        }
+
+        // Premium sections
+        if (!premium) {
+            renderPremiumLock('premium-section', 'Analisis Produk Lanjutan');
+        } else {
+            // Trend lines
+            const trendColors = ['#14b8a6','#6366f1','#f59e0b'];
+            new Chart(document.getElementById('chart-trend'),{type:'line',data:{labels:data.trend.labels,datasets:data.trend.datasets.map((ds,i)=>({label:ds.label,data:ds.data,borderColor:trendColors[i],backgroundColor:'transparent',borderWidth:2,tension:.4,pointRadius:3,pointBackgroundColor:trendColors[i]}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}}},scales:{y:{beginAtZero:true,grid:{borderDash:[2,4],color:'#f1f5f9'}},x:{grid:{display:false}}}}});
+
+            // Product analysis
+            const analyses = [
+                {label:'Produk Paling Menguntungkan',value:data.products.sort((a,b)=>b.revenue-a.revenue)[0].name,color:'var(--success)',icon:'ph-trophy'},
+                {label:'Tingkat Konversi Tertinggi',value:'Baju Rajut Premium',color:'var(--info)',icon:'ph-target'},
+                {label:'Pertumbuhan Tercepat',value:'Sambal Roa Original (+28%)',color:'var(--brand-600)',icon:'ph-rocket-launch'},
+                {label:'Stok Perlu Restock',value:'Keripik Singkong Pedas',color:'var(--warning)',icon:'ph-warning-circle'}
+            ];
+            document.getElementById('product-analysis').innerHTML = analyses.map(a=>`<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--surface-alt);border-radius:var(--radius-lg);border:1px solid var(--border-light);"><i class="ph-fill ${a.icon}" style="font-size:1.25rem;color:${a.color};flex-shrink:0;"></i><div><p style="font-size:.6875rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;">${a.label}</p><p style="font-size:.875rem;font-weight:700;color:var(--text-primary);">${a.value}</p></div></div>`).join('');
+
+            document.getElementById('export-row').innerHTML = '<button class="btn btn-outline btn-sm" onclick="showToast(\'Data CSV berhasil di-download\',\'success\')"><i class="ph ph-download-simple"></i> Export CSV</button>';
+        }
+    </script>
+</body>
+</html>

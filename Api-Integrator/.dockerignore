@@ -1,0 +1,15 @@
+.git
+.vscode
+venv
+node_modules
+npm-debug.log
+__pycache__
+*.pyc
+*.pyo
+.env
+Context
+dokumentasi
+*.sql
+tests
+*.test.py
+*_test.py

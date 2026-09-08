@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id             String          @id @default(uuid())
+  service_name   String          @unique
+  display_name   String
+  callback_url   String?
+  status         ServiceStatus   @default(ACTIVE)
+  rate_limit_rps Int             @default(50)
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  api_keys       ServiceApiKey[]
+
+  @@index([service_name])
+}
+
+enum ServiceStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+}
+
+model ServiceApiKey {
+  id           String    @id @default(uuid())
+  service_id   String
+  key_prefix   String    @unique
+  key_hash     String
+  label        String?
+  last_used_at DateTime?
+  expires_at   DateTime?
+  status       KeyStatus @default(ACTIVE)
+  created_at   DateTime  @default(now())
+  revoked_at   DateTime?
+  service      Service   @relation(fields: [service_id], references: [id])
+
+  @@index([service_id])
+  @@index([key_prefix])
+  @@index([status])
+}
+
+enum KeyStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+model LinkageMap {
+  id                  String    @id @default(uuid())
+  service_id          String
+  external_user_id    String
+  smartbank_user_id   String
+  smartbank_wallet_id String
+  phone               String
+  phone_verified      Boolean   @default(false)
+  linked_at           DateTime  @default(now())
+  unlinked_at         DateTime?
+
+  @@unique([service_id, external_user_id])
+  @@unique([service_id, phone])
+  @@index([smartbank_wallet_id])
+  @@index([phone])
+}
+
+model OtpRequest {
+  id           String     @id @default(uuid())
+  request_id   String     @unique
+  service_id   String
+  linkage_id   String?
+  phone        String
+  purpose      OtpPurpose
+  code_hash    String
+  status       OtpStatus  @default(PENDING)
+  attempts     Int        @default(0)
+  max_attempts Int        @default(3)
+  expires_at   DateTime
+  consumed_at  DateTime?
+  created_at   DateTime   @default(now())
+
+  @@index([phone, status])
+  @@index([phone, created_at])
+  @@index([expires_at])
+  @@index([service_id])
+}
+
+enum OtpPurpose {
+  WALLET_LINK
+}
+
+enum OtpStatus {
+  PENDING
+  CONSUMED
+  EXPIRED
+  BLOCKED
+}
+
+model IdempotencyRecord {
+  id              String   @id @default(uuid())
+  key             String
+  service_id      String
+  endpoint        String
+  request_hash    String
+  response_status Int
+  response_body   Json
+  created_at      DateTime @default(now())
+  expires_at      DateTime
+
+  @@unique([service_id, endpoint, key])
+  @@index([expires_at])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  timestamp    DateTime @default(now())
+  service_id   String?
+  service_name String?
+  actor_type   String
+  actor_id     String?
+  action       String
+  target_type  String?
+  target_id    String?
+  request_id   String?
+  ip_address   String?
+  metadata     Json?
+  signature    String
+  previous_id  String?
+
+  @@index([timestamp])
+  @@index([service_id, timestamp])
+  @@index([target_type, target_id])
+  @@index([action, timestamp])
+}
+
+model PaymentRecord {
+  id                     String   @id @default(uuid())
+  service_id             String
+  external_ref_id        String
+  central_transaction_id String   @unique
+  buyer_external_id      String
+  gross_amount           String
+  status                 String   @default("SETTLED")
+  reversal_transaction_id String? @unique
+  created_at             DateTime @default(now())
+  reversed_at            DateTime?
+
+  @@unique([service_id, external_ref_id])
+  @@index([service_id, status])
+}

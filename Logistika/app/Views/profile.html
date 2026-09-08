@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akun Profil - LogistiKita</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/profile.css">
+</head>
+
+<body class="portal-page">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <a href="#" class="mobile-logo" style="font-weight: 900; text-decoration: none; color: #1e293b; display: flex; align-items: center; gap: 8px; font-size: 1.2rem;">
+            <i class="fas fa-cube" style="color: #e11d48;"></i> LogistiKita
+        </a>
+        <button class="hamburger-btn" id="mobileMenuToggle" style="background: none; border: none; font-size: 1.5rem; color: #1e293b; cursor: pointer;">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <a href="" class="sidebar-logo">
+            <i class="fas fa-cube"></i> LogistiKita
+        </a>
+
+        <div class="sidebar-nav">
+            <div class="nav-group-label">Menu Pengguna</div>
+            <div id="sidebar-menu-content">
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-home"></i> Beranda
+                </a>
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-box"></i> Pemesanan Pengiriman
+                </a>
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-truck-fast"></i> Status Pengiriman
+                </a>
+                <a href="dashboard" class="sidebar-item" style="text-decoration:none;">
+                    <i class="fas fa-history"></i> Riwayat Pengiriman
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-profile-side">
+                <div class="avatar" id="nav-user-avatar">U</div>
+                <div class="user-info">
+                    <span class="user-name-side" id="nav-user-name">Pengguna</span>
+                    <span class="user-role-side" id="nav-user-role">MEMBER</span>
+                </div>
+            </div>
+            <div style="padding: 0 16px; margin-top: 8px;">
+                <a href="auth" style="display: flex; align-items: center; gap: 12px; font-weight: 700; color: #f87171; text-decoration: none; padding: 12px; border-radius: 12px; transition: background 0.3s;">
+                    <i class="fas fa-sign-out-alt"></i> Log Out
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <div class="portal-content">
+    <!-- Main Content -->
+    <main class="profile-dashboard">
+        
+        <!-- Center Profile Tabs -->
+        <div class="profile-tabs-wrapper">
+            <div class="header-tab active" data-target="pane-data"><i class="fas fa-user"></i> Data Profil</div>
+            <div class="header-tab" data-target="pane-settings"><i class="fas fa-sliders-h"></i> Pengaturan</div>
+            <div class="header-tab" data-target="pane-policy"><i class="fas fa-shield-alt"></i> Persyaratan & Privasi</div>
+        </div>
+
+        <!-- Centered User Card -->
+        <div class="profile-header-centered">
+            <div class="avatar-glow" id="profile-avatar-glow">FF</div>
+            <h1 class="user-name" id="profile-user-name">Memuat...</h1>
+            <div class="premium-badge" id="profile-user-role"><i class="fas fa-crown"></i> MEMBER</div>
+        </div>
+
+        <section class="content-area">
+
+            <!-- PANE 1: Data Diri -->
+            <div id="pane-data" class="pane active">
+                <div class="pane-header">
+                    <h2>Data Diri</h2>
+                    <p>Kelola informasi identitas dan alamat untuk pengiriman.</p>
+                </div>
+                <form>
+                    <div class="data-grid">
+                        <div class="data-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" class="data-input" id="profile-input-name" value="">
+                        </div>
+                        <div class="data-group">
+                            <label>Nomor HP / WhatsApp</label>
+                            <input type="tel" class="data-input" id="profile-input-phone" value="" placeholder="Masukkan Nomor HP">
+                        </div>
+                        <div class="data-group" style="grid-column: 1 / -1;">
+                            <label>Alamat Email</label>
+                            <input type="email" class="data-input" id="profile-input-email" value="" readonly>
+                        </div>
+                        <div class="data-group" style="grid-column: 1 / -1;">
+                            <label>Alamat Utama (Rumah / Kantor)</label>
+                            <textarea class="data-input"
+                                rows="4">Jl. Telekomunikasi No. 1, Terusan Buahbatu, Bandung, Jawa Barat</textarea>
+                        </div>
+                    </div>
+                    <!-- Moved standard action button inside for cleaner mobile view -->
+                    <button type="button" class="action-btn"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                </form>
+            </div>
+
+            <!-- PANE 2: Pengaturan -->
+            <div id="pane-settings" class="pane">
+                <div class="pane-header">
+                    <h2>Pengaturan Akun</h2>
+                    <p>Sesuaikan preferensi notifikasi dan keamanan akun Anda.</p>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Notifikasi Pengiriman</h4>
+                        <p>Terima update resi via WhatsApp & Email.</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <h4>Autentikasi Dua Faktor</h4>
+                        <p>Tingkatkan lapisan keamanan saat login baru.</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-row" style="border-bottom: none;">
+                    <div class="setting-info">
+                        <h4>Ganti Kata Sandi</h4>
+                        <p>Perbarui keamanan akun berkala.</p>
+                    </div>
+                    <button type="button" class="action-btn"
+                        style="margin-top:0; width: auto; background: var(--gray-800); box-shadow:none; padding: 12px 24px;"><i
+                            class="fas fa-key"></i> Ubah Password</button>
+                </div>
+            </div>
+
+            <!-- PANE 3: Kebijakan -->
+            <div id="pane-policy" class="pane">
+                <div class="pane-header">
+                    <h2>Persyaratan & Privasi</h2>
+                    <p>Aturan perlindungan privasi data pribadi Anda.</p>
+                </div>
+                <div
+                    style="background: var(--gray-50); padding: 30px; border-radius: 16px; border: 1px solid var(--gray-200); color: var(--text-secondary); line-height: 1.8; max-height: 400px; overflow-y: auto;">
+                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">1. Syarat Penggunaan
+                        Layanan</h4>
+                    <p style="margin-bottom: 20px;">Dengan mengakses portal LogistiKita, Anda menyetujui seluruh
+                        ketentuan standar logistik, mencakup batas maksimum beban, larangan jenis barang tertentu
+                        (seperti barang mudah meledak), serta ketentuan asuransi pengiriman.</p>
+
+                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">2. Pengumpulan Data
+                    </h4>
+                    <p style="margin-bottom: 20px;">LogistiKita mengumpulkan informasi dasar seperti Nama, Alamat, dan
+                        Nomor HP murni untuk kebutuhan pengiriman fisik. Data ini dilindungi enkripsi standar industri
+                        tingkat bank.</p>
+
+                    <h4 style="color: var(--brand-dark); margin-bottom: 10px; font-size: 1.1rem;">3. Hak Penghapusan
+                        (Right to be Forgotten)</h4>
+                    <p>Sebagai pengguna, Anda berhak penuh untuk meminta pembersihan seluruh jejak digital kami
+                        (History, Order, Data Akun). Silakan hubungi pusat bantuan kami kapan saja.</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer" style="background-color: var(--brand-dark); padding: 60px 0 30px 0; color: white;">
+        <div class="container" style="text-align: center;">
+            <a href="home" class="logo" style="color: white; justify-content: center; margin-bottom: 24px;">
+                <i class="fas fa-cube"
+                    style="background: white; -webkit-text-fill-color: var(--brand-primary); padding: 5px; border-radius: 8px;"></i>
+                <span>Logisti<b>Kita</b></span>
+            </a>
+            <p style="color: rgba(255,255,255,0.6); max-width: 600px; margin: 0 auto 30px auto; font-size:0.9rem;">
+                Solusi logistik premium untuk bisnis dan personal. Tercepat, terpercaya, dan tersebar di seluruh
+                Indonesia.</p>
+        </div>
+    </div> <!-- End of portal-content -->
+
+    <script src="assets/js/profile.js"></script>
+</body>
+
+</html>

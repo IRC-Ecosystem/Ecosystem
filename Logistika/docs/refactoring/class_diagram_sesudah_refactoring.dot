@@ -1,0 +1,45 @@
+digraph LogistiKitaAfter {
+  rankdir=LR;
+  graph [fontname="Arial", bgcolor="white", label="Class Diagram Sesudah Refactoring", labelloc=t, fontsize=18];
+  node [shape=record, fontname="Arial", fontsize=10, style="rounded,filled", fillcolor="#F8FAFC", color="#334155"];
+  edge [fontname="Arial", fontsize=9, color="#475569"];
+
+  Router [label="{Router|+ dispatch(request)\l|Route mapping only}"];
+  JwtAuthenticator [label="{JwtAuthenticator|+ authenticate(headers)\l|Token validation}"];
+  RequestLogger [label="{RequestLogger|+ record(request,response)\l|API logging}"];
+  ResponseFactory [label="{JsonResponseFactory|+ success()\l+ error()\l|HTTP response formatting}"];
+  ShipmentController [label="{ShipmentController|- shipmentService\l- pricingService\l|+ requestPengiriman()\l+ trackingStatus()\l+ biayaPengiriman()\l}"];
+  AuthController [label="{AuthController|- authService\l|+ login()\l+ register()\l+ getUsers()\l}"];
+  AuthService [label="{AuthService|- users\l- tokenGenerator\l- hasher\l|+ login()\l+ register()\l}"];
+  ShipmentService [label="{ShipmentService|- shipments\l- ledger\l- paymentGateway\l- webhookNotifier\l|+ createShipment()\l+ updateStatus()\l+ payShipment()\l+ cancelShipment()\l}"];
+  PricingService [label="{PricingService|+ calculate(request)\l|Tariff, insurance, service fee rules}"];
+  ShipmentRepository [label="{ShipmentRepository|+ findByResi()\l+ save()\l+ updateStatus()\l+ listForCourier()\l}"];
+  UserRepository [label="{UserRepository|+ findByEmail()\l+ create()\l+ findAll()\l}"];
+  LedgerService [label="{LedgerService|+ recordIncome()\l+ recordExpense()\l+ recordStatusLog()\l}"];
+  PaymentGateway [label="{PaymentGatewayInterface|+ charge()\l+ refund()\l+ getBalance()\l}", fillcolor="#ECFDF5"];
+  SmartBankGateway [label="{SmartBankGateway|+ charge()\l+ refund()\l+ getBalance()\l}"];
+  SimulatedBankGateway [label="{SimulatedBankGateway|+ charge()\l+ refund()\l+ getBalance()\l}"];
+  WebhookNotifier [label="{WebhookNotifier|+ notifyShipmentStatus()\l}"];
+  MySQL [label="{MySQL Database|users\llayanan\lpengiriman\lriwayat_status\lpembayaran\lpembukuan\lapi_logs\l}", fillcolor="#EFF6FF"];
+
+  Router -> JwtAuthenticator;
+  Router -> RequestLogger;
+  Router -> ShipmentController;
+  Router -> AuthController;
+  ShipmentController -> ResponseFactory;
+  AuthController -> ResponseFactory;
+  AuthController -> AuthService;
+  ShipmentController -> ShipmentService;
+  ShipmentController -> PricingService;
+  AuthService -> UserRepository;
+  ShipmentService -> ShipmentRepository;
+  ShipmentService -> LedgerService;
+  ShipmentService -> PaymentGateway;
+  ShipmentService -> WebhookNotifier;
+  PricingService -> ShipmentRepository [style=dashed, label="optional tariff lookup"];
+  ShipmentRepository -> MySQL;
+  UserRepository -> MySQL;
+  LedgerService -> MySQL;
+  SmartBankGateway -> PaymentGateway [arrowhead=empty];
+  SimulatedBankGateway -> PaymentGateway [arrowhead=empty];
+}

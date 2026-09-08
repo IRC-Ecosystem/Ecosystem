@@ -1,0 +1,32 @@
+digraph LogistiKitaBefore {
+  rankdir=LR;
+  graph [fontname="Arial", bgcolor="white", label="Class Diagram Sebelum Refactoring", labelloc=t, fontsize=18];
+  node [shape=record, fontname="Arial", fontsize=10, style="rounded,filled", fillcolor="#F8FAFC", color="#334155"];
+  edge [fontname="Arial", fontsize=9, color="#475569"];
+
+  Index [label="{index.php|+ verifyJWT()\l+ logApiRequest()\l+ route API & view\l|Router, authenticator, logger, dispatcher}"];
+  BaseController [label="{BaseController|+ sendResponse()\l+ getRequestData()\l|HTTP helper inherited by controllers}"];
+  AuthController [label="{AuthController|- userModel\l|+ login()\l+ register()\l+ getUsers()\l}"];
+  LogistikitaController [label="{LogistikitaController|- pengirimanModel\l|+ requestPengiriman()\l+ biayaPengiriman()\l+ pembayaranLogistik()\l+ trackingStatus()\l+ daftarPengiriman()\l}"];
+  User [label="{User|- conn: mysqli\l|+ findByEmail()\l+ create()\l+ findAll()\l}"];
+  Pengiriman [label="{Pengiriman|- conn: mysqli\l|+ create()\l+ updateStatus()\l+ updatePaymentStatus()\l+ addPembukuan()\l+ triggerWebhookCallback()\l}"];
+  SmartBank [label="{SmartBank|- static baseUrl\l|+ processTransaction()\l+ processRefund()\l+ getBalance()\l}"];
+  Database [label="{Database|- host/user/pass/db_name\l- conn\l|+ getConnection()\l}"];
+  MySQL [label="{MySQL Database|users\llayanan\lpengiriman\lriwayat_status\lpembayaran\lpembukuan\lapi_logs\l}", fillcolor="#EFF6FF"];
+  Gateway [label="{API Gateway / SmartBank|HTTP cURL callback/payment}", fillcolor="#FFF7ED"];
+
+  Index -> Database;
+  Index -> AuthController;
+  Index -> LogistikitaController;
+  AuthController -> BaseController;
+  LogistikitaController -> BaseController;
+  AuthController -> User;
+  LogistikitaController -> Pengiriman;
+  LogistikitaController -> SmartBank [label="static call"];
+  User -> MySQL [label="raw SQL"];
+  Pengiriman -> MySQL [label="raw SQL"];
+  Pengiriman -> SmartBank [label="static payment"];
+  Pengiriman -> Gateway [label="webhook cURL"];
+  Database -> MySQL;
+  SmartBank -> Gateway [label="cURL + session fallback"];
+}

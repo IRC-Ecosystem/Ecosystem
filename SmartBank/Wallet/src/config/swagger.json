@@ -1,0 +1,544 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SmartBank Wallet API Documentation",
+    "version": "1.0.0",
+    "description": "Dokumentasi API E-Wallet SmartBank (Tier-2) yang terintegrasi secara microservice dengan Central Bank moneter. Gunakan fitur 'Try it out' untuk menguji endpoint secara langsung.\n\n## Autentikasi\nSemua endpoint protected memerlukan header `Authorization: Bearer <accessToken>` yang didapat dari `POST /api/v1/auth/login`.\n\n## Keamanan Transaksi\n- **PIN Transaksi**: Endpoint finansial (transfer, bayar tagihan, topup, withdraw, claim stimulus) memerlukan header `X-Wallet-Pin` berisi 6-digit PIN.\n- **Idempotency-Key**: Endpoint mutasi saldo (transfer, bayar tagihan, apply loan, repay loan) memerlukan header `Idempotency-Key` unik untuk mencegah double-spend.\n\n## Response Format\nSemua response mengikuti format standar:\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"error\": null,\n  \"meta\": { \"request_id\": \"...\", \"timestamp\": \"...\" }\n}\n```"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:6969",
+      "description": "Server Wallet Lokal (Host)"
+    }
+  ],
+  "tags": [
+    { "name": "Autentikasi", "description": "Register & Login pengguna" },
+    { "name": "Wallet", "description": "Saldo, mutasi, KYC, profil, dan pengaturan" },
+    { "name": "Transaksi Simulasi", "description": "Top-up, withdraw, klaim stimulus (simulasi)" },
+    { "name": "Transfer P2P", "description": "Transfer dana antar pengguna" },
+    { "name": "Pembayaran Tagihan / QR", "description": "Generate & bayar invoice" },
+    { "name": "Kredit UMKM", "description": "Pengajuan, daftar, dan cicilan pinjaman" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Masukkan token JWT akses (accessToken) yang didapatkan dari endpoint login. Format: Bearer <token>"
+      },
+      "walletPin": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Wallet-Pin",
+        "description": "6-digit PIN transaksi pengguna"
+      },
+      "idempotencyKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Idempotency-Key",
+        "description": "Kunci unik untuk mencegah double-spend pada transaksi finansial"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["name", "email", "phone", "password", "pin"],
+        "properties": {
+          "name": { "type": "string", "maxLength": 120, "example": "Budi Santoso", "description": "Nama lengkap pengguna" },
+          "email": { "type": "string", "format": "email", "example": "budi.santoso@smartbank.test" },
+          "phone": { "type": "string", "pattern": "^\\+?[1-9]\\d{6,14}$", "example": "081234567890" },
+          "password": { "type": "string", "minLength": 8, "maxLength": 128 },
+          "pin": { "type": "string", "pattern": "^[0-9]{6}$", "example": "123456", "description": "6-digit PIN transaksi" },
+          "role": { "type": "string", "enum": ["RETAIL_CUSTOMER", "MERCHANT", "SUPPLIER"], "example": "RETAIL_CUSTOMER", "description": "Role opsional, default RETAIL_CUSTOMER" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "example": "budi.santoso@smartbank.test" },
+          "password": { "type": "string", "maxLength": 128 }
+        }
+      },
+      "TopUpRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": { "type": "integer", "minimum": 1, "example": 50000, "description": "Nominal top-up (bilangan bulat positif)" }
+        }
+      },
+      "WithdrawRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": { "type": "integer", "minimum": 1, "example": 25000, "description": "Nominal penarikan (bilangan bulat positif)" }
+        }
+      },
+      "UpdateProfileRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "example": "Budi Santoso Updated", "description": "Nama lengkap baru" },
+          "phone": { "type": "string", "pattern": "^\\+?[1-9]\\d{6,14}$", "example": "081234567891", "description": "Nomor telepon baru (opsional)" }
+        }
+      },
+      "UpdateSecurityRequest": {
+        "type": "object",
+        "properties": {
+          "password": { "type": "string", "minLength": 8, "maxLength": 128, "description": "Password baru (opsional, min 8 karakter)" },
+          "pin": { "type": "string", "pattern": "^[0-9]{6}$", "example": "654321", "description": "PIN transaksi baru 6-digit (opsional)" }
+        },
+        "description": "Minimal salah satu field (password atau pin) harus diisi"
+      },
+      "UpgradeAccountRequest": {
+        "type": "object",
+        "required": ["role", "businessName", "nik"],
+        "properties": {
+          "role": { "type": "string", "enum": ["MERCHANT", "SUPPLIER", "ANALYTICS_VIEWER"], "example": "MERCHANT", "description": "Role bisnis yang diajukan" },
+          "businessName": { "type": "string", "example": "Toko Kelontong Budi", "description": "Nama bisnis/usaha" },
+          "nik": { "type": "string", "pattern": "^[0-9]{16}$", "example": "3273012345678901", "description": "Nomor NIK 16-digit" }
+        }
+      },
+      "KycDocumentRequest": {
+        "type": "object",
+        "required": ["documentType", "documentNumber", "documentName", "documentDataUrl"],
+        "properties": {
+          "documentType": { "type": "string", "enum": ["KTP", "SIM", "PASSPORT"], "example": "KTP", "description": "Jenis dokumen identitas" },
+          "documentNumber": { "type": "string", "pattern": "^[A-Za-z0-9.-]{6,32}$", "example": "3273012345678901", "description": "Nomor dokumen (6-32 karakter alfanumerik)" },
+          "documentName": { "type": "string", "minLength": 3, "maxLength": 120, "example": "Budi Santoso", "description": "Nama sesuai dokumen" },
+          "documentDataUrl": { "type": "string", "maxLength": 650000, "example": "data:image/png;base64,iVBORw0KGgo...", "description": "Data URL dokumen (PNG/JPG/WEBP/PDF, max ~500KB)" }
+        }
+      },
+      "LoanApplyRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": { "type": "integer", "minimum": 1, "example": 10000, "description": "Nominal kredit yang diajukan (bilangan bulat positif)" }
+        }
+      },
+      "LoanRepayRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "amount": { "type": "integer", "minimum": 1, "example": 5500, "description": "Nominal cicilan pelunasan kredit" }
+        }
+      },
+      "PayInvoiceRequest": {
+        "type": "object",
+        "properties": {
+          "pin": { "type": "string", "pattern": "^[0-9]{6}$", "example": "123456", "description": "6-digit PIN transaksi (opsional di body, wajib di header X-Wallet-Pin)" }
+        }
+      },
+      "TransferRequest": {
+        "type": "object",
+        "required": ["amount"],
+        "properties": {
+          "to_wallet_id": { "type": "string", "format": "uuid", "example": "785cb000-2f2b-474d-aad9-6e566465dbaa", "description": "UUID Wallet tujuan (opsional jika to_account_number diisi)" },
+          "to_account_number": { "type": "string", "pattern": "^[0-9]{10}$", "example": "1000000001", "description": "Nomor rekening 10-digit tujuan (direkomendasikan)" },
+          "amount": { "type": "integer", "minimum": 1, "example": 5000, "description": "Nominal dana yang ditransfer" },
+          "note": { "type": "string", "example": "Bayar kopi", "description": "Catatan transfer opsional" }
+        },
+        "description": "Gunakan to_account_number (10-digit) atau to_wallet_id (UUID). Minimal salah satu wajib diisi."
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data": { "type": "object", "nullable": true },
+          "error": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "details": { "type": "object" }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "request_id": { "type": "string" },
+              "timestamp": { "type": "string", "format": "date-time" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Pendaftaran User E-Wallet Baru",
+        "description": "Mendaftarkan user baru dan secara otomatis membuat akun di Central Bank dengan saldo perdana Rp 50.000. Rate-limited: 10 request/menit.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User berhasil terdaftar dan akun moneter disiapkan." },
+          "400": { "description": "Input tidak valid atau email/telepon sudah terdaftar." },
+          "429": { "description": "Terlalu banyak percobaan. Coba lagi nanti." }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["Autentikasi"],
+        "summary": "Login Pengguna",
+        "description": "Masuk menggunakan email dan password untuk mendapatkan token JWT akses dan refresh token. Rate-limited: 10 request/menit.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login berhasil, mengembalikan accessToken dan refreshToken." },
+          "401": { "description": "Kredensial salah." },
+          "429": { "description": "Terlalu banyak percobaan login." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/balance": {
+      "get": {
+        "tags": ["Wallet"],
+        "summary": "Cek Saldo Dompet",
+        "description": "Membaca saldo riil (CBDC_IDR), hold, dan limit transaksi harian terkini yang terdaftar di Central Bank untuk akun pengguna yang login.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Detail saldo berhasil ditarik." },
+          "401": { "description": "Tidak diotorisasi (Token JWT tidak valid atau kosong)." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/transactions": {
+      "get": {
+        "tags": ["Wallet"],
+        "summary": "Riwayat Mutasi Rekening",
+        "description": "Menampilkan seluruh daftar transaksi moneter (Transfer, Kredit, Pembayaran) beserta detail debit/kredit dan pihak lawan (double-entry ledger).",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Riwayat mutasi berhasil diambil." },
+          "401": { "description": "Tidak diotorisasi." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/kyc-document": {
+      "get": {
+        "tags": ["Wallet"],
+        "summary": "Lihat Dokumen KYC",
+        "description": "Melihat status dan dokumen KYC yang sudah diunggah (tipe dokumen, nomor, nama, status upload).",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Data KYC berhasil diambil." },
+          "404": { "description": "Pengguna tidak ditemukan." }
+        }
+      },
+      "put": {
+        "tags": ["Wallet"],
+        "summary": "Upload Dokumen KYC",
+        "description": "Mengunggah dokumen identitas (KTP/SIM/PASSPORT) untuk verifikasi Teller. Dokumen dikirim sebagai data URL (base64). Setelah upload, status menunggu verifikasi Teller.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/KycDocumentRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Dokumen berhasil diunggah, menunggu verifikasi Teller." },
+          "400": { "description": "Input tidak valid (jenis dokumen, format, atau ukuran file)." },
+          "404": { "description": "Pengguna tidak ditemukan." }
+        }
+      }
+    },
+    "/api/v1/wallets/lookup": {
+      "get": {
+        "tags": ["Transfer P2P"],
+        "summary": "Cari Penerima Transfer (Lookup)",
+        "description": "Mencari informasi penerima transfer berdasarkan nomor rekening 10-digit. Mengembalikan holder_name dan wallet_id (tanpa saldo, mencegah enumeration). Tidak bisa mencari rekening sendiri.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "account_number",
+            "in": "query",
+            "required": true,
+            "description": "Nomor rekening 10-digit tujuan",
+            "schema": { "type": "string", "pattern": "^[0-9]{10}$", "example": "1000000002" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Data penerima ditemukan (account_number, holder_name, wallet_id)." },
+          "400": { "description": "Nomor rekening tidak valid atau rekening sendiri." },
+          "404": { "description": "Nomor rekening tidak ditemukan." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/invoice/generate-test": {
+      "post": {
+        "tags": ["Pembayaran Tagihan / QR"],
+        "summary": "Generate Test Invoice (Dev Helper)",
+        "description": "Membuat invoice simulasi PENDING untuk pengujian bayar tagihan. Hanya tersedia di environment development. Memerlukan role MANAGER, TELLER, atau CENTRAL_BANK_ADMIN.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "201": { "description": "Invoice simulasi berhasil dibuat." },
+          "403": { "description": "Role tidak diizinkan atau endpoint tidak tersedia di production." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/topup": {
+      "post": {
+        "tags": ["Transaksi Simulasi"],
+        "summary": "Top-Up Saldo (Simulasi)",
+        "description": "Menambah saldo dompet secara simulasi (simulasi transfer dari rekening bank). Memerlukan header X-Wallet-Pin.",
+        "security": [{ "bearerAuth": [] }, { "walletPin": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TopUpRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Top-up berhasil diproses." },
+          "400": { "description": "Nominal tidak valid." },
+          "401": { "description": "PIN salah atau tidak disertakan." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/withdraw": {
+      "post": {
+        "tags": ["Transaksi Simulasi"],
+        "summary": "Tarik Tunai (Simulasi)",
+        "description": "Menarik saldo dari dompet secara simulasi (simulasi transfer ke rekening bank). Memerlukan header X-Wallet-Pin.",
+        "security": [{ "bearerAuth": [] }, { "walletPin": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WithdrawRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Penarikan berhasil diproses." },
+          "400": { "description": "Nominal tidak valid atau saldo tidak mencukupi." },
+          "401": { "description": "PIN salah atau tidak disertakan." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/claim-stimulus": {
+      "post": {
+        "tags": ["Transaksi Simulasi"],
+        "summary": "Klaim Stimulus Pemerintah",
+        "description": "Mengklaim dana stimulus pemerintah (jika eligible). Memerlukan header X-Wallet-Pin.",
+        "security": [{ "bearerAuth": [] }, { "walletPin": [] }],
+        "responses": {
+          "200": { "description": "Stimulus berhasil diklaim." },
+          "400": { "description": "Tidak memenuhi syarat atau sudah pernah klaim." },
+          "401": { "description": "PIN salah atau tidak disertakan." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/profile": {
+      "put": {
+        "tags": ["Wallet"],
+        "summary": "Update Profil",
+        "description": "Memperbarui nama lengkap dan/atau nomor telepon pengguna.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProfileRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profil berhasil diperbarui." },
+          "400": { "description": "Input tidak valid atau nomor telepon sudah terdaftar." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/security": {
+      "put": {
+        "tags": ["Wallet"],
+        "summary": "Update Pengaturan Keamanan",
+        "description": "Memperbarui password dan/atau PIN transaksi. Minimal salah satu field harus diisi.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateSecurityRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Pengaturan keamanan berhasil diperbarui." },
+          "400": { "description": "Input tidak valid (password < 8 karakter atau PIN bukan 6 digit)." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/upgrade": {
+      "put": {
+        "tags": ["Wallet"],
+        "summary": "Ajukan Upgrade Akun Bisnis",
+        "description": "Mengajukan upgrade role ke MERCHANT, SUPPLIER, atau ANALYTICS_VIEWER. Memerlukan NIK dan nama bisnis. Status menunggu persetujuan Teller.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpgradeAccountRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Pengajuan upgrade tercatat, menunggu persetujuan Teller." },
+          "400": { "description": "Role tidak valid, NIK tidak valid, atau field wajib kosong." }
+        }
+      }
+    },
+    "/api/v1/wallets/me/subscribe-insight": {
+      "post": {
+        "tags": ["Wallet"],
+        "summary": "Langganan UMKM Insight Premium",
+        "description": "Berlangganan layanan premium UMKM Insight. Biaya langganan akan didebit dari saldo dompet.",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Langganan berhasil." },
+          "400": { "description": "Saldo tidak mencukupi." }
+        }
+      }
+    },
+    "/api/v1/transfers": {
+      "post": {
+        "tags": ["Transfer P2P"],
+        "summary": "Transfer Dana P2P",
+        "description": "Mengirimkan saldo CBDC dari wallet pengirim ke wallet penerima secara instan. Memerlukan header X-Wallet-Pin dan Idempotency-Key. Tujuan bisa menggunakan to_account_number (10-digit) atau to_wallet_id (UUID).",
+        "security": [{ "bearerAuth": [] }, { "walletPin": [] }, { "idempotencyKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TransferRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Transfer berhasil diselesaikan." },
+          "400": { "description": "Input tidak valid, saldo tidak cukup, atau transfer ke rekening sendiri." },
+          "401": { "description": "PIN salah atau tidak disertakan." },
+          "409": { "description": "Idempotency-Key sudah digunakan (duplicate request)." }
+        }
+      }
+    },
+    "/api/v1/payment-requests/{id}/pay": {
+      "post": {
+        "tags": ["Pembayaran Tagihan / QR"],
+        "summary": "Bayar Invoice / Tagihan QR",
+        "description": "Menyelesaikan permohonan pembayaran (Payment Request) dengan settlement saldo secara ACID di Central Bank. Memerlukan header X-Wallet-Pin dan Idempotency-Key.",
+        "security": [{ "bearerAuth": [] }, { "walletPin": [] }, { "idempotencyKey": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Payment Request ID / ID tagihan",
+            "schema": { "type": "string", "example": "pr_abc123" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PayInvoiceRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tagihan berhasil diselesaikan." },
+          "400": { "description": "ID tagihan tidak valid atau saldo tidak cukup." },
+          "401": { "description": "PIN salah atau tidak disertakan." },
+          "404": { "description": "Tagihan tidak ditemukan." },
+          "409": { "description": "Idempotency-Key sudah digunakan." }
+        }
+      }
+    },
+    "/api/v1/loans/me": {
+      "get": {
+        "tags": ["Kredit UMKM"],
+        "summary": "Daftar Pinjaman Saya",
+        "description": "Menampilkan semua pinjaman aktif (PENDING/DISBURSED/PARTIAL_PAID) milik pengguna beserta limit kredit (cap, outstanding, remaining).",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Daftar pinjaman berhasil diambil (loans + limit)." },
+          "401": { "description": "Tidak diotorisasi." }
+        }
+      }
+    },
+    "/api/v1/loans/apply": {
+      "post": {
+        "tags": ["Kredit UMKM"],
+        "summary": "Ajukan Pinjaman UMKM",
+        "description": "Mengajukan kredit modal UMKM ke LOAN_POOL_ACCOUNT bank sentral. Jika disetujui, dana langsung dicairkan ke saldo dompet. Memerlukan header Idempotency-Key.",
+        "security": [{ "bearerAuth": [] }, { "idempotencyKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoanApplyRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Pinjaman berhasil diajukan/dicairkan." },
+          "400": { "description": "Nominal tidak valid atau melebihi limit." },
+          "409": { "description": "Idempotency-Key sudah digunakan." }
+        }
+      }
+    },
+    "/api/v1/loans/{loan_id}/repay": {
+      "post": {
+        "tags": ["Kredit UMKM"],
+        "summary": "Bayar Cicilan Pinjaman",
+        "description": "Membayar cicilan pinjaman UMKM langsung dari saldo CBDC dompet ke bank sentral. Memerlukan header Idempotency-Key.",
+        "security": [{ "bearerAuth": [] }, { "idempotencyKey": [] }],
+        "parameters": [
+          {
+            "name": "loan_id",
+            "in": "path",
+            "required": true,
+            "description": "ID pinjaman yang ingin dicicil",
+            "schema": { "type": "string", "example": "loan_abc123" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoanRepayRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Cicilan berhasil diproses." },
+          "400": { "description": "Nominal tidak valid, saldo tidak cukup, atau pinjaman tidak aktif." },
+          "404": { "description": "Pinjaman tidak ditemukan." },
+          "409": { "description": "Idempotency-Key sudah digunakan." }
+        }
+      }
+    }
+  }
+}
