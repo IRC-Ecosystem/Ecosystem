@@ -1,0 +1,21 @@
+# Local configuration and dependencies
+.env
+.env.*
+!.env.example
+**/node_modules/
+
+# Nested repositories are published through their own pull requests.
+SmartBank/
+POS/
+Marketplace/
+SupplierHub/
+Logistika/
+Api-Integrator/
+UMKM-Insight/
+
+# Generated workspace output
+.codex/
+graphify-out/
+
+# Local scratch files
+_patch_test.txt

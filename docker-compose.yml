@@ -1,0 +1,398 @@
+name: eco
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    mem_limit: 768m
+    cpus: 1.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-central_bank_core}
+      MYSQL_USER: ${MYSQL_USER:-central_bank}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      POS_DB_PASSWORD: ${POS_DB_PASSWORD:?Set POS_DB_PASSWORD in .env}
+      MARKETPLACE_DB_PASSWORD: ${MARKETPLACE_DB_PASSWORD:?Set MARKETPLACE_DB_PASSWORD in .env}
+      UMKM_DB_PASSWORD: ${UMKM_DB_PASSWORD:?Set UMKM_DB_PASSWORD in .env}
+      SUPPLIERHUB_DB_PASSWORD: ${SUPPLIERHUB_DB_PASSWORD:?Set SUPPLIERHUB_DB_PASSWORD in .env}
+      LOGISTIKA_DB_PASSWORD: ${LOGISTIKA_DB_PASSWORD:?Set LOGISTIKA_DB_PASSWORD in .env}
+      INTEGRATOR_DB_PASSWORD: ${INTEGRATOR_DB_PASSWORD:?Set INTEGRATOR_DB_PASSWORD in .env}
+    ports:
+      - "${MYSQL_PORT:-3301}:3306"
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+      - ./docker/mysql/00-users.sh:/docker-entrypoint-initdb.d/00-users.sh:ro
+      - ./SmartBank/Connector/prisma/init.sql:/docker-entrypoint-initdb.d/01-connector.sql:ro
+      - ./Marketplace/database/pasarkita.sql:/docker-entrypoint-initdb.d/02-marketplace.sql:ro
+      - ./UMKM-Insight/dokumentasi/database.sql:/docker-entrypoint-initdb.d/03-umkm-insight.sql:ro
+      - ./UMKM-Insight/dokumentasi/database_patch.sql:/docker-entrypoint-initdb.d/04-umkm-insight-audit.sql:ro
+      - ./UMKM-Insight/dokumentasi/database_patch_2.sql:/docker-entrypoint-initdb.d/05-umkm-insight-cache.sql:ro
+      - ./UMKM-Insight/dokumentasi/database_events.sql:/docker-entrypoint-initdb.d/06-umkm-insight-events.sql:ro
+      - ./POS/database/migrate_to_current_schema.sql:/docker-entrypoint-initdb.d/07-warungpos.sql:ro
+      - ./SupplierHub/sql/setup.sql:/docker-entrypoint-initdb.d/08-supplierhub.sql:ro
+      - ./SupplierHub/sql/migrations/004_p1_local_procurement.sql:/docker-entrypoint-initdb.d/12-supplierhub-procurement.sql:ro
+      - ./SupplierHub/sql/migrations/006_p2_local_reliability.sql:/docker-entrypoint-initdb.d/14-supplierhub-reliability.sql:ro
+      - ./Logistika/schema.sql:/docker-entrypoint-initdb.d/15-logistika.sql:ro
+      - ./Marketplace/database/migrate_production_integrations.sql:/docker-entrypoint-initdb.d/16-marketplace-integrations.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 180s
+    networks: [eco]
+
+  central-bank:
+    build: ./SmartBank/Central-Bank
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.75
+    environment:
+      DATABASE_URL: mysql://${MYSQL_USER:-central_bank}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE:-central_bank_core}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      SERVICE_TOKEN: ${SERVICE_TOKEN:?Set SERVICE_TOKEN in .env}
+      JWT_ISSUER: ${JWT_ISSUER:-smartbank}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-smartbank-clients}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002,http://localhost:5173,http://localhost:8080,http://localhost:3006,http://localhost:3007,http://localhost:4004,http://localhost:4005}
+      PORT: 3000
+    ports: ["3000:3000"]
+    depends_on:
+      mysql: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  wallet:
+    build: ./SmartBank/Wallet
+    restart: unless-stopped
+    profiles: [ui]
+    mem_limit: 192m
+    cpus: 0.50
+    environment:
+      PORT: 6969
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_ISSUER: ${JWT_ISSUER:-smartbank}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-smartbank-clients}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: wallet_app
+      DB_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      DB_NAME: wallet_db
+      USE_IN_MEMORY_DB: "false"
+      CENTRAL_BANK_CORE_URL: http://central-bank:3000
+      SERVICE_TOKEN: ${SERVICE_TOKEN:?Set SERVICE_TOKEN in .env}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002,http://localhost:5173,http://localhost:8080,http://localhost:3006,http://localhost:3007,http://localhost:4004,http://localhost:4005}
+    ports: ["6969:6969"]
+    depends_on:
+      mysql: { condition: service_healthy }
+      central-bank: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:6969/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  gateway:
+    build: ./SmartBank/Gateway
+    restart: unless-stopped
+    profiles: [ui]
+    mem_limit: 160m
+    cpus: 0.50
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_ISSUER: ${JWT_ISSUER:-smartbank}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-smartbank-clients}
+      CENTRAL_BANK_URL: http://central-bank:3000
+      WALLET_URL: http://wallet:6969
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3001,http://localhost:3002,http://localhost:5173,http://localhost:8080,http://localhost:3006,http://localhost:3007,http://localhost:4004,http://localhost:4005}
+    ports: ["4000:4000"]
+    depends_on:
+      central-bank: { condition: service_healthy }
+      wallet: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  connector:
+    build: ./SmartBank/Connector
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.75
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      DATABASE_URL: mysql://connector_app:${MYSQL_PASSWORD}@mysql:3306/connector_db
+      CENTRAL_BANK_URL: http://central-bank:3000
+      CENTRAL_BANK_SERVICE_TOKEN: ${SERVICE_TOKEN:?Set SERVICE_TOKEN in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      RATE_LIMIT_DEFAULT_RPS: 50
+      ADMIN_API_KEY: ${CONNECTOR_ADMIN_KEY:?Set CONNECTOR_ADMIN_KEY in .env}
+      AUDIT_HMAC_SECRET: ${CONNECTOR_AUDIT_HMAC_SECRET:?Set CONNECTOR_AUDIT_HMAC_SECRET in .env}
+      ADMIN_ALLOWED_IPS: ${CONNECTOR_ADMIN_ALLOWED_IPS:-127.0.0.1,::1,172.*}
+      BOOTSTRAP_POS_API_KEY: ${SMARTBANK_WARUNGPOS_API_KEY:?Set SMARTBANK_WARUNGPOS_API_KEY in .env}
+      BOOTSTRAP_MARKETPLACE_API_KEY: ${SMARTBANK_MARKETPLACE_API_KEY:?Set SMARTBANK_MARKETPLACE_API_KEY in .env}
+      BOOTSTRAP_SUPPLIERHUB_API_KEY: ${SMARTBANK_SUPPLIERHUB_API_KEY:?Set SMARTBANK_SUPPLIERHUB_API_KEY in .env}
+      UMKM_INSIGHT_EVENTS_URL: http://umkm-insight/api/events.php
+      UMKM_INSIGHT_SMARTBANK_KEY: ${UMKM_INSIGHT_SMARTBANK_KEY:?Set UMKM_INSIGHT_SMARTBANK_KEY in .env}
+      UMKM_INSIGHT_EVENT_HMAC_SECRET: ${UMKM_INSIGHT_EVENT_HMAC_SECRET:?Set UMKM_INSIGHT_EVENT_HMAC_SECRET in .env}
+      LOGISTIKA_URL: http://logistikita:4005
+      LOGISTIKA_API_KEY: ${LOGISTIKA_API_KEY:?Set LOGISTIKA_API_KEY in .env}
+      INTEGRATION_WEBHOOK_SECRET: ${INTEGRATION_WEBHOOK_SECRET:?Set INTEGRATION_WEBHOOK_SECRET in .env}
+    ports: ["5000:5000"]
+    depends_on:
+      mysql: { condition: service_healthy }
+      central-bank: { condition: service_started }
+      umkm-insight: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5000/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  smartbank-frontend:
+    build:
+      context: ./SmartBank/frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:4000}
+    restart: unless-stopped
+    profiles: [ui]
+    mem_limit: 256m
+    cpus: 0.50
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:4000}
+    ports: ["3001:3001"]
+    depends_on:
+      gateway: { condition: service_started }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 15s
+      retries: 12
+    networks: [eco]
+
+  central-bank-frontend:
+    build: ./SmartBank/Central-Bank/frontend
+    restart: unless-stopped
+    profiles: [ui]
+    mem_limit: 256m
+    cpus: 0.50
+    environment:
+      VITE_API_BASE_URL: ${CENTRAL_BANK_UI_API_BASE_URL:-http://localhost:3000/api/v1}
+    ports: ["5173:5173"]
+    depends_on:
+      central-bank: { condition: service_started }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:5173"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  pos:
+    build: ./POS
+    restart: unless-stopped
+    profiles: [pos]
+    mem_limit: 192m
+    cpus: 0.50
+    environment:
+      PORT: 3002
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: pos_app
+      DB_PASS: ${POS_DB_PASSWORD:?Set POS_DB_PASSWORD in .env}
+      DB_NAME: ${POS_DB_NAME:-warungpos}
+      SMARTBANK_CONNECTOR_URL: http://connector:5000
+      SMARTBANK_CONNECTOR_API_KEY: ${SMARTBANK_WARUNGPOS_API_KEY:?Set SMARTBANK_WARUNGPOS_API_KEY in .env}
+      SMARTBANK_POS_SELLER_EXTERNAL_ID: ${SMARTBANK_POS_SELLER_EXTERNAL_ID:-pos-merchant-main}
+      SMARTBANK_CONNECTOR_TIMEOUT_MS: ${SMARTBANK_CONNECTOR_TIMEOUT_MS:-10000}
+      UMKM_INSIGHT_EVENTS_URL: http://umkm-insight/api/events.php
+      UMKM_INSIGHT_WARUNGPOS_KEY: ${UMKM_INSIGHT_WARUNGPOS_KEY:?Set UMKM_INSIGHT_WARUNGPOS_KEY in .env}
+      UMKM_INSIGHT_EVENT_HMAC_SECRET: ${UMKM_INSIGHT_EVENT_HMAC_SECRET:?Set UMKM_INSIGHT_EVENT_HMAC_SECRET in .env}
+      SESSION_SECRET: ${POS_SESSION_SECRET:?Set POS_SESSION_SECRET in .env}
+    ports: ["3002:3002"]
+    depends_on:
+      mysql: { condition: service_healthy }
+      connector: { condition: service_healthy }
+      logistikita: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--header=x-warungpos-health-check:internal", "--spider", "http://127.0.0.1:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  marketplace:
+    build: ./Marketplace
+    restart: unless-stopped
+    profiles: [marketplace]
+    mem_limit: 192m
+    cpus: 0.50
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      BASEURL: http://localhost:8080/
+      DB_HOST: mysql
+      DB_USER: marketplace_app
+      DB_PASS: ${MARKETPLACE_DB_PASSWORD:?Set MARKETPLACE_DB_PASSWORD in .env}
+      DB_NAME: ${MARKETPLACE_DB_NAME:-pasarkita}
+      SMARTBANK_CONNECTOR_URL: http://connector:5000
+      SMARTBANK_CONNECTOR_API_KEY: ${SMARTBANK_MARKETPLACE_API_KEY:?Set SMARTBANK_MARKETPLACE_API_KEY in .env}
+      SMARTBANK_MARKETPLACE_EXTERNAL_ID: ${SMARTBANK_MARKETPLACE_EXTERNAL_ID:-marketplace-merchant-main}
+      SMARTBANK_CONNECTOR_TIMEOUT_MS: ${SMARTBANK_CONNECTOR_TIMEOUT_MS:-10000}
+      UMKM_INSIGHT_EVENTS_URL: http://umkm-insight/api/events.php
+      UMKM_INSIGHT_MARKETPLACE_KEY: ${UMKM_INSIGHT_MARKETPLACE_KEY:?Set UMKM_INSIGHT_MARKETPLACE_KEY in .env}
+      UMKM_INSIGHT_SUPPLIERHUB_KEY: ${UMKM_INSIGHT_SUPPLIERHUB_KEY:?Set UMKM_INSIGHT_SUPPLIERHUB_KEY in .env}
+      UMKM_INSIGHT_EVENT_HMAC_SECRET: ${UMKM_INSIGHT_EVENT_HMAC_SECRET:?Set UMKM_INSIGHT_EVENT_HMAC_SECRET in .env}
+    ports: [8080:80]
+    depends_on:
+      mysql: { condition: service_healthy }
+      connector: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  umkm-insight:
+    build: ./UMKM-Insight
+    restart: unless-stopped
+    mem_limit: 160m
+    cpus: 0.50
+    environment:
+      APP_ENV: production
+      APP_DEBUG: false
+      DB_HOST: mysql
+      DB_NAME: umkm_insight
+      DB_USER: insight_app
+      DB_PASSWORD: ${UMKM_DB_PASSWORD:?Set UMKM_DB_PASSWORD in .env}
+      UMKM_INSIGHT_SMARTBANK_KEY: ${UMKM_INSIGHT_SMARTBANK_KEY:?Set UMKM_INSIGHT_SMARTBANK_KEY in .env}
+      UMKM_INSIGHT_WARUNGPOS_KEY: ${UMKM_INSIGHT_WARUNGPOS_KEY:?Set UMKM_INSIGHT_WARUNGPOS_KEY in .env}
+      UMKM_INSIGHT_MARKETPLACE_KEY: ${UMKM_INSIGHT_MARKETPLACE_KEY:?Set UMKM_INSIGHT_MARKETPLACE_KEY in .env}
+      UMKM_INSIGHT_SUPPLIERHUB_KEY: ${UMKM_INSIGHT_SUPPLIERHUB_KEY:?Set UMKM_INSIGHT_SUPPLIERHUB_KEY in .env}
+      UMKM_INSIGHT_EVENT_HMAC_SECRET: ${UMKM_INSIGHT_EVENT_HMAC_SECRET:?Set UMKM_INSIGHT_EVENT_HMAC_SECRET in .env}
+    ports: [3006:80]
+    depends_on:
+      mysql: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/api/health.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  supplierhub:
+    build: ./SupplierHub
+    restart: unless-stopped
+    profiles: [supplier, integrator]
+    mem_limit: 192m
+    cpus: 0.50
+    environment:
+      SUPPLIERHUB_APP_ENV: production
+      SUPPLIERHUB_DB_HOST: mysql
+      SUPPLIERHUB_DB_NAME: supplierhub_db
+      SUPPLIERHUB_DB_USER: supplierhub_app
+      SUPPLIERHUB_DB_PASS: ${SUPPLIERHUB_DB_PASSWORD:?Set SUPPLIERHUB_DB_PASSWORD in .env}
+      SUPPLIERHUB_JWT_SECRET: ${SUPPLIERHUB_JWT_SECRET:?Set SUPPLIERHUB_JWT_SECRET in .env}
+      SMARTBANK_CONNECTOR_URL: http://connector:5000
+      SMARTBANK_CONNECTOR_API_KEY: ${SMARTBANK_SUPPLIERHUB_API_KEY:?Set SMARTBANK_SUPPLIERHUB_API_KEY in .env}
+      SMARTBANK_SUPPLIERHUB_SELLER_EXTERNAL_ID: ${SMARTBANK_SUPPLIERHUB_SELLER_EXTERNAL_ID:-supplierhub-merchant-main}
+      INTEGRATION_WEBHOOK_SECRET: ${INTEGRATION_WEBHOOK_SECRET:?Set INTEGRATION_WEBHOOK_SECRET in .env}
+      LOGISTIKA_URL: http://logistikita:4005
+      LOGISTIKA_API_KEY: ${LOGISTIKA_API_KEY:?Set LOGISTIKA_API_KEY in .env}
+      UMKM_INSIGHT_EVENTS_URL: http://umkm-insight/api/events.php
+      UMKM_INSIGHT_SUPPLIERHUB_KEY: ${UMKM_INSIGHT_SUPPLIERHUB_KEY:?Set UMKM_INSIGHT_SUPPLIERHUB_KEY in .env}
+      UMKM_INSIGHT_EVENT_HMAC_SECRET: ${UMKM_INSIGHT_EVENT_HMAC_SECRET:?Set UMKM_INSIGHT_EVENT_HMAC_SECRET in .env}
+    ports: [4004:80]
+    depends_on:
+      mysql: { condition: service_healthy }
+      connector: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1/health.php"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  logistikita:
+    build: ./Logistika
+    restart: unless-stopped
+    profiles: [pos, supplier, integrator]
+    mem_limit: 128m
+    cpus: 0.50
+    environment:
+      PORT: 4005
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: logistika_app
+      DB_PASSWORD: ${LOGISTIKA_DB_PASSWORD:?Set LOGISTIKA_DB_PASSWORD in .env}
+      DB_NAME: logistika
+      LOGISTIKA_API_KEY: ${LOGISTIKA_API_KEY:?Set LOGISTIKA_API_KEY in .env}
+      INTEGRATION_WEBHOOK_SECRET: ${INTEGRATION_WEBHOOK_SECRET:?Set INTEGRATION_WEBHOOK_SECRET in .env}
+      SUPPLIERHUB_CALLBACK_URL: http://supplierhub/api/integrations.php?action=logistics_shipment_event
+      MARKETPLACE_CALLBACK_URL: http://marketplace/integration/logistics
+    ports: [4005:4005]
+    depends_on:
+      mysql: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:4005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [eco]
+
+  api-integrator:
+    build: ./Api-Integrator
+    restart: unless-stopped
+    profiles: [integrator]
+    mem_limit: 192m
+    cpus: 0.50
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: integrator_app
+      DB_PASSWORD: ${INTEGRATOR_DB_PASSWORD:?Set INTEGRATOR_DB_PASSWORD in .env}
+      DB_NAME: tugasgateaway
+      SECRET_KEY: ${API_INTEGRATOR_SECRET_KEY:?Set API_INTEGRATOR_SECRET_KEY in .env}
+      CORS_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      SMARTBANK_BASE_URL: http://connector:5000
+      MARKETPLACE_BASE_URL: http://marketplace
+      POS_BASE_URL: http://pos:3002
+      SUPPLIERHUB_BASE_URL: http://supplierhub
+      LOGISTIKITA_BASE_URL: http://logistikita:4005
+      LOGISTIKITA_API_KEY: ${LOGISTIKA_API_KEY:?Set LOGISTIKA_API_KEY in .env}
+      UMKM_INSIGHT_BASE_URL: http://umkm-insight
+      SMARTBANK_API_KEY: ${SMARTBANK_CONNECTOR_API_KEY:?Set SMARTBANK_CONNECTOR_API_KEY in .env}
+    ports: [4001:4001]
+    depends_on:
+      mysql: { condition: service_healthy }
+      connector: { condition: service_healthy }
+      supplierhub: { condition: service_healthy }
+      logistikita: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4001/health', timeout=10)"]
+      interval: 10s
+      timeout: 15s
+      retries: 12
+    networks: [eco]
+
+networks:
+  eco:
+
+volumes:
+  mysql_prod_data:
